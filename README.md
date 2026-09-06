@@ -3,8 +3,8 @@
 This demonstrates an end-to-end amortized Bayesian workflow for **Multifractal Models of Asset Returns (MMAR)**.
 We will train neural posterior estimators on simulated markets, then reuse them across rolling $T$-day windows to estimate parameters, simulate wealth paths, and quantify downside risk from real market returns.
 
-- [Univariate · SPMO / VOO](mmar_bayesian_workflow_final.ipynb) ·
-- [Multivariate · VOO / GLD / TLT](mmar_multivariate_bayesian_workflow.ipynb)
+- [Univariate MMAR (VOO / SPMO)](mmar_bayesian_workflow_final.ipynb)
+- [Multivariate (VOO / GLD / TLT)](mmar_multivariate_bayesian_workflow.ipynb)
 
 ## From a cascade to market returns
 

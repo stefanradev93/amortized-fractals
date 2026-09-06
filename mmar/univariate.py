@@ -47,12 +47,15 @@ def prior_table(prior=PRIOR):
 
 
 def draw_parameters(n, rng, prior=PRIOR):
-    # Keep the established prior and random-number order of the final demo.
     sigma = rng.uniform(prior.sigma_low, prior.sigma_high, n)
     q = rng.uniform(prior.q_low, prior.q_high, n)
     nu = 2 + np.exp(rng.uniform(np.log(prior.nu_low - 2), np.log(prior.nu_high - 2), n))
     mu = rng.normal(prior.mu_loc, prior.mu_sd, n)
     return np.column_stack((mu, sigma, q, nu))
+
+
+def stack_samples(samples):
+    return np.concatenate([samples[key] for key in samples], axis=-1)
 
 
 def cascade(q, rng):
@@ -72,7 +75,6 @@ def cascade(q, rng):
 
 def simulate_from_parameters(parameters, rng):
     """One 256-day path per parameter vector; redraw paths crossing -100%."""
-    parameters = np.asarray(parameters, dtype="float64")
     mu, sigma, q, nu = parameters.T
     n = len(parameters)
     returns = np.empty((n, WINDOW))
@@ -91,41 +93,20 @@ def simulate_from_parameters(parameters, rng):
             break
     else:
         raise RuntimeError("Could not draw valid simple-return paths in 100 attempts.")
-    # No empirical centering or variance normalization of simulated shocks.
-    return {"theta": parameters, "returns": returns.astype("float32"), "cascade": weights}
+
+    return {
+        "mu": mu[:, None], 
+        "sigma_bar": sigma[:, None], 
+        "q": q[:, None], 
+        "nu": nu[:, None], 
+        "returns": returns, 
+        "cascade": weights
+    }
 
 
 def simulate(n, seed=None, prior=PRIOR):
     rng = np.random.default_rng(seed)
     return simulate_from_parameters(draw_parameters(n, rng, prior), rng)
-
-
-def conditions(returns):
-    """Pass raw decimal returns as a single-channel time series."""
-    return {"series": np.asarray(returns, dtype="float32")[..., None]}
-
-
-def training_data(n, seed=None, prior=PRIOR):
-    data = simulate(n, seed, prior)
-    return {
-        **conditions(data["returns"]),
-        **{
-            name: data["theta"][:, j : j + 1].astype("float32")
-            for j, name in enumerate(PARAMETER_NAMES)
-        },
-    }
-
-
-def stack_parameters(samples):
-    """BayesFlow's adapter has already inverted constraints to physical units."""
-    return np.concatenate([samples[name] for name in PARAMETER_NAMES], axis=-1)
-
-
-def sample_posterior(workflow, returns, num_samples, seed=None):
-    draws = workflow.sample(
-        conditions=conditions(returns), num_samples=num_samples, batch_size=64, seed=seed
-    )
-    return stack_parameters(draws)
 
 
 def forward_paths(parameters, horizon, rng):
