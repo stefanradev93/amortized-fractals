@@ -5,6 +5,7 @@ from pathlib import Path
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import numpy as np
+from umap import UMAP
 
 from .. import univariate as model
 from .screen import rank_stocks
@@ -50,6 +51,86 @@ def batch_plot(series, dates, path):
         )
         fig.colorbar(
             im, ax=ax, label="Daily return (%); color clipped at 98th percentile", extend="both"
+        )
+        return _save(fig, path)
+
+
+def embedding_space_plot(
+    simulated_summaries,
+    real_summaries,
+    labels,
+    path,
+    seed=44,
+    n_neighbors=30,
+    min_dist=0.12,
+):
+    """Fit one joint UMAP and compare simulated with observed summary vectors."""
+    simulated = np.asarray(simulated_summaries, dtype=float)
+    real = np.asarray(real_summaries, dtype=float)
+    if simulated.ndim != 2 or real.ndim != 2 or simulated.shape[1] != real.shape[1]:
+        raise ValueError("Summary arrays must be 2D with the same embedding dimension.")
+    if len(simulated) < 2 or len(real) < 1:
+        raise ValueError("Provide at least two simulations and one observed summary.")
+    if not np.isfinite(simulated).all() or not np.isfinite(real).all():
+        raise ValueError("Summary arrays must contain only finite values.")
+    if len(labels) != 2:
+        raise ValueError("Provide exactly two labels: simulated and observed.")
+
+    combined = np.vstack((simulated, real))
+    scale = combined.std(axis=0)
+    standardized = (combined - combined.mean(axis=0)) / np.where(scale > 1e-12, scale, 1)
+    reducer = UMAP(
+        n_components=2,
+        n_neighbors=min(n_neighbors, len(combined) - 1),
+        min_dist=min_dist,
+        metric="euclidean",
+        random_state=seed,
+        transform_seed=seed,
+        n_jobs=1,
+    )
+    embedded = reducer.fit_transform(standardized)
+    simulated_xy = embedded[: len(simulated)]
+    real_xy = embedded[len(simulated) :]
+
+    with plt.rc_context(STYLE):
+        fig, ax = plt.subplots(figsize=(11.5, 8), layout="constrained")
+        ax.scatter(
+            *simulated_xy.T,
+            s=20,
+            color=PURPLE,
+            alpha=0.22,
+            linewidths=0,
+            label=f"{labels[0]} ({len(simulated):,})",
+            rasterized=True,
+        )
+        ax.scatter(
+            *real_xy.T,
+            s=38,
+            color=TEAL,
+            alpha=0.82,
+            edgecolors="white",
+            linewidths=0.35,
+            label=f"{labels[1]} ({len(real):,})",
+            rasterized=True,
+        )
+        ax.set(
+            xlabel="UMAP dimension 1",
+            ylabel="UMAP dimension 2",
+            title="Learned summary space: prior simulations and observed stocks",
+        )
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.grid(False)
+        legend = ax.legend(loc="upper left", frameon=True)
+        for handle in legend.legend_handles:
+            handle.set_alpha(0.9)
+        ax.text(
+            0.01,
+            0.01,
+            "UMAP is fitted jointly",
+            transform=ax.transAxes,
+            color="#555b66",
+            fontsize=11,
         )
         return _save(fig, path)
 
