@@ -133,79 +133,146 @@ def parameter_plot(table, path):
         return _save(fig, path)
 
 
-def fit_plot(posterior, series, metadata, table, dates, path, seed=None, figsize=(12, 6)):
-    """One replicated 256-day path per posterior draw for the highest-ranked stock."""
-    ticker = table.ticker.iloc[0]
-    index = metadata.index[metadata.ticker == ticker][0]
+def fit_plot(
+    posterior,
+    series,
+    metadata,
+    table,
+    dates,
+    path,
+    top_n=4,
+    seed=None,
+    figsize=(15, 18),
+):
+    """Posterior predictive fit checks for the highest-ranked stocks."""
+    top = table.head(top_n)
+    if top.empty:
+        raise ValueError("The ranking table must contain at least one stock.")
     rng = np.random.default_rng(seed)
-    draws = posterior[index]
-    paths = model.simulate_from_parameters(draws, rng)["returns"]
-    observed = series[index, :, 0]
-    wealth = np.column_stack((np.ones(len(paths)), np.cumprod(1 + paths, axis=1)))
-    observed_wealth = np.r_[1, np.cumprod(1 + observed)]
-    drawdowns = 100 * (1 - np.min(wealth / np.maximum.accumulate(wealth, axis=1), axis=1))
-    observed_drawdown = 100 * (1 - np.min(observed_wealth / np.maximum.accumulate(observed_wealth)))
     with plt.rc_context(STYLE):
-        fig, axes = plt.subplots(1, 3, figsize=figsize, layout="constrained")
+        fig, axes = plt.subplots(
+            len(top),
+            3,
+            figsize=figsize,
+            squeeze=False,
+            layout="constrained",
+        )
         days = np.arange(model.WINDOW + 1)
-        for lo, hi, alpha, label in [
-            (0.04, 0.96, 0.15, "92% predictive interval"),
-            (0.16, 0.84, 0.3, "68% predictive interval"),
-        ]:
-            bands = np.quantile(wealth, [lo, hi], axis=0)
-            axes[0].fill_between(days, *bands, color=PURPLE, alpha=alpha, label=label)
-        axes[0].plot(days, np.median(wealth, axis=0), color=PURPLE, label="Predictive median", lw=2)
-        axes[0].plot(days, observed_wealth, color="black", ls="--", label="Observed", lw=2)
-        axes[0].set(
-            xlabel="Day within observed window",
-            ylabel="Wealth from $1",
-            title=f"{ticker}: cumulative wealth",
-        )
-        axes[0].axhline(1)
-        axes[0].legend()
-        limits = np.quantile(np.r_[paths.ravel(), observed], [0.001, 0.999]) * 100
-        bins = np.linspace(*limits, 60)
-        # Weights, rather than density=True, preserve mass outside the displayed range.
-        width = bins[1] - bins[0]
-        axes[1].hist(
-            100 * paths.ravel(),
-            bins=bins,
-            weights=np.full(paths.size, 1 / paths.size / width),
-            color=PURPLE,
-            alpha=0.35,
-            label="Predictive",
-        )
+        for row, ticker in enumerate(top.ticker):
+            matches = metadata.index[metadata.ticker == ticker]
+            if len(matches) != 1:
+                raise ValueError(f"Expected exactly one input series for {ticker}.")
+            index = matches[0]
+            draws = posterior[index]
+            paths = model.simulate_from_parameters(draws, rng)["returns"]
+            observed = series[index, :, 0]
+            wealth = np.column_stack((np.ones(len(paths)), np.cumprod(1 + paths, axis=1)))
+            observed_wealth = np.r_[1, np.cumprod(1 + observed)]
+            drawdowns = 100 * (
+                1 - np.min(wealth / np.maximum.accumulate(wealth, axis=1), axis=1)
+            )
+            observed_drawdown = 100 * (
+                1 - np.min(observed_wealth / np.maximum.accumulate(observed_wealth))
+            )
 
-        axes[1].hist(
-            100 * observed,
-            bins=bins,
-            weights=np.full(len(observed), 1 / len(observed) / width),
-            histtype="step",
-            color="black",
-            linestyle="--",
-            lw=2,
-            label="Observed",
-        )
-        axes[1].set(
-            xlabel="Daily return (%); central 99.8% display",
-            ylabel="Density",
-            title="Marginal return check",
-        )
-        axes[1].axvline(100 * np.median(paths), color=PURPLE, lw=2, label="Predictive median")
-        axes[1].legend()
-        axes[2].hist(
-            drawdowns, bins=35, color=PURPLE, alpha=0.35, label="One path per posterior draw"
-        )
-        axes[2].axvline(np.median(drawdowns), color=PURPLE, lw=2, label="Predictive median")
-        axes[2].axvline(observed_drawdown, color="black", ls="--", lw=2, label="Observed")
-        axes[2].set(
-            xlabel="Maximum drawdown (% loss)",
-            ylabel="Number of draws",
-            title="Maximum drawdown over 256 days",
-        )
-        axes[2].legend()
+            wealth_ax, returns_ax, drawdown_ax = axes[row]
+            for lo, hi, alpha, label in [
+                (0.04, 0.96, 0.15, "92% predictive interval"),
+                (0.16, 0.84, 0.3, "68% predictive interval"),
+            ]:
+                bands = np.quantile(wealth, [lo, hi], axis=0)
+                wealth_ax.fill_between(days, *bands, color=PURPLE, alpha=alpha, label=label)
+            wealth_ax.plot(
+                days,
+                np.median(wealth, axis=0),
+                color=PURPLE,
+                label="Predictive median",
+                lw=2,
+            )
+            wealth_ax.plot(
+                days,
+                observed_wealth,
+                color="black",
+                ls="--",
+                label="Observed",
+                lw=2,
+            )
+            wealth_ax.set(
+                xlabel="Day within observed window",
+                ylabel="Wealth from $1",
+                title=f"{ticker}: cumulative wealth",
+            )
+
+            limits = np.quantile(np.r_[paths.ravel(), observed], [0.001, 0.999]) * 100
+            bins = np.linspace(*limits, 60)
+            # Weights, rather than density=True, preserve mass outside the displayed range.
+            width = bins[1] - bins[0]
+            returns_ax.hist(
+                100 * paths.ravel(),
+                bins=bins,
+                weights=np.full(paths.size, 1 / paths.size / width),
+                color=PURPLE,
+                alpha=0.35,
+                label="Predictive",
+            )
+            returns_ax.hist(
+                100 * observed,
+                bins=bins,
+                weights=np.full(len(observed), 1 / len(observed) / width),
+                histtype="step",
+                color="black",
+                linestyle="--",
+                lw=2,
+                label="Observed",
+            )
+            returns_ax.set(
+                xlabel="Daily return (%); central 99.8% display",
+                ylabel="Density",
+                title=f"{ticker}: marginal returns",
+            )
+            returns_ax.axvline(
+                100 * np.median(paths),
+                color=PURPLE,
+                lw=2,
+                label="Predictive median",
+            )
+
+            drawdown_ax.hist(
+                drawdowns,
+                bins=35,
+                color=PURPLE,
+                alpha=0.35,
+                label="One path per posterior draw",
+            )
+            drawdown_ax.axvline(
+                np.median(drawdowns),
+                color=PURPLE,
+                lw=2,
+                label="Predictive median",
+            )
+            drawdown_ax.axvline(
+                observed_drawdown,
+                color="black",
+                ls="--",
+                lw=2,
+                label="Observed",
+            )
+            drawdown_ax.set(
+                xlabel="Maximum drawdown (% loss)",
+                ylabel="Number of draws",
+                title=f"{ticker}: maximum drawdown",
+            )
+            show_x_labels = row == len(top) - 1
+            for ax in axes[row]:
+                ax.grid(alpha=0.15)
+                ax.tick_params(axis="x", labelbottom=show_x_labels)
+                if not show_x_labels:
+                    ax.set_xlabel("")
+
+        for ax in axes[0]:
+            ax.legend()
         fig.suptitle(
-            f"Latest 256-day window ending {dates[-1]:%Y-%m-%d}",
-            fontsize=17,
+            f"Top {len(top)} stocks: latest 256-day window ending {dates[-1]:%Y-%m-%d}",
+            fontsize=19,
         )
         return _save(fig, path)

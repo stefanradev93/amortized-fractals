@@ -52,7 +52,7 @@ def _loss_var_and_es(returns: np.ndarray, alpha: float) -> tuple[float, float]:
     return -100.0 * threshold, -100.0 * float(np.mean(tail))
 
 
-def posterior_decision_table(
+def posterior_risk_table(
     posterior_samples: np.ndarray,
     metadata: pd.DataFrame,
     observed_returns: pd.DataFrame,
@@ -69,9 +69,11 @@ def posterior_decision_table(
     posterior-predictive VaR/ES. The distribution of conditional VaR/ES values
     across parameter draws provides a 90% posterior uncertainty interval.
 
-    A conventional historical-simulation estimate from overlapping horizon
+    A model-free historical-simulation estimate from all overlapping horizon
     returns in the same 256-day information window is included as a benchmark.
-    The realized forward return is retrospective context only.
+    It uses only observations available as of the window end. The realized
+    forward return is retrospective evaluation context only and is never used
+    to estimate VaR or ES.
     """
 
     posterior = np.asarray(posterior_samples)

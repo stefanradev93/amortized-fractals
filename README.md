@@ -89,7 +89,7 @@ python -m pip install -e .
 KERAS_BACKEND=torch jupyter lab
 ```
 
-The two workflow notebooks define their workflows explicitly. **Run All trains** in those notebooks; stop before *Amortized inference* for prior checks only. The screener only loads a saved model. Market returns are cached in `data/`, and all figures are saved in `figures/`. Models and plotting/decision helpers live in [`mmar/`](mmar/).
+The two workflow notebooks define their workflows explicitly. **Run All trains** in those notebooks; stop before *Amortized inference* for prior checks only. The screener only loads a saved model. Market returns are cached in `data/`, and all figures are saved in `figures/`. Models and plotting/risk helpers live in [`mmar/`](mmar/).
 
 Regenerate the animation with `python -m mmar.viz.cascade`.
 
@@ -105,5 +105,6 @@ Stocks are ranked by **gain probability (%) / expected shortfall (%)** over 20 t
 Gain includes 0.20% round-trip costs; shortfall measures the average gross loss in the worst
 5% of outcomes. A 70% gain probability with 10% shortfall gives a score of 7. Higher is better.
 Fit flags compare observed return summaries with simulated ranges and remain visible beside
-each rank. The fit plot shows wealth, daily returns and maximum drawdown, with observations
-in black. Simulations use current constituents and fresh cascade phases.
+each rank. The 4-by-3 fit plot shows wealth, daily returns and maximum drawdown for the four
+highest-ranked stocks, with observations in black. Simulations use current constituents and
+fresh cascade phases.

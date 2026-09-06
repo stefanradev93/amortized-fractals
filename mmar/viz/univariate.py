@@ -3,6 +3,7 @@ from typing import Mapping, Sequence
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from ..statistics import max_drawdown_batch
 from . import (
     PREDICTION_PURPLE,
     PREDICTION_PURPLE_DARK,
@@ -209,7 +210,7 @@ def plot_posterior_predictive_checks(
     tickers: Sequence[str],
     n_resimulations: int = 12,
 ) -> plt.Figure:
-    """Plot return, wealth, and marginal-distribution PPCs by asset."""
+    """Plot maximum drawdown, wealth, and marginal-return PPCs by asset."""
 
     paths = np.asarray(posterior_paths, dtype="float64")
     observed = np.asarray(observed_windows, dtype="float64")
@@ -228,73 +229,88 @@ def plot_posterior_predictive_checks(
     for asset_id, (ticker, ticker_dates) in enumerate(zip(tickers, dates)):
         return_paths = RETURN_SCALE * paths[asset_id]
         observed_returns = RETURN_SCALE * observed[asset_id]
-        return_bands = _predictive_bands(return_paths)
 
         wealth_paths = np.cumprod(1.0 + paths[asset_id], axis=1)
         observed_wealth = np.cumprod(1.0 + observed[asset_id])
         wealth_bands = _predictive_bands(wealth_paths)
 
-        for col, (simulated, observed_series, bands, ylabel, title) in enumerate(
-            [
-                (
-                    return_paths,
-                    observed_returns,
-                    return_bands,
-                    f"Daily return ({RETURN_UNIT})",
-                    "Daily returns",
-                ),
-                (
-                    wealth_paths,
-                    observed_wealth,
-                    wealth_bands,
-                    "Growth of $1",
-                    "Cumulative wealth",
-                ),
-            ]
-        ):
-            ax = axes[asset_id, col]
-            ax.fill_between(
+        drawdown_ax = axes[asset_id, 0]
+        predictive_drawdowns = RETURN_SCALE * max_drawdown_batch(paths[asset_id])
+        observed_drawdown = float(
+            RETURN_SCALE * max_drawdown_batch(observed[asset_id][None, :])[0]
+        )
+        display_low, display_high = np.quantile(predictive_drawdowns, (0.001, 0.999))
+        display_low = min(float(display_low), observed_drawdown)
+        display_high = max(float(display_high), observed_drawdown)
+        padding = 0.04 * max(display_high - display_low, 1e-6)
+        drawdown_bins = np.linspace(
+            display_low - padding,
+            min(0.0, display_high + padding),
+            46,
+        )
+        interval_low, interval_high = np.quantile(predictive_drawdowns, (0.04, 0.96))
+        drawdown_ax.axvspan(
+            interval_low,
+            interval_high,
+            color=PREDICTION_PURPLE_LIGHT,
+            alpha=0.50,
+        )
+        drawdown_ax.hist(
+            predictive_drawdowns,
+            bins=drawdown_bins,
+            density=True,
+            color=PREDICTION_PURPLE,
+            edgecolor=PREDICTION_PURPLE_DARK,
+            linewidth=0.5,
+            alpha=0.62,
+        )
+        drawdown_ax.axvline(observed_drawdown, color=OBSERVED_COLOR, linewidth=2.6)
+        drawdown_ax.set_title(f"{ticker}: Predicted maximum drawdown", fontsize=17)
+        drawdown_ax.set_xlabel(f"Maximum drawdown ({RETURN_UNIT})", fontsize=15)
+        drawdown_ax.set_ylabel("Density", fontsize=15)
+        drawdown_ax.set_yticks([])
+        drawdown_ax.tick_params(axis="x", labelsize=13)
+        drawdown_ax.grid(False, axis="y")
+
+        wealth_ax = axes[asset_id, 1]
+        wealth_ax.fill_between(
+            ticker_dates,
+            wealth_bands["q04"],
+            wealth_bands["q96"],
+            color=PREDICTION_PURPLE_LIGHT,
+            alpha=0.50,
+        )
+        wealth_ax.fill_between(
+            ticker_dates,
+            wealth_bands["q16"],
+            wealth_bands["q84"],
+            color=PREDICTION_PURPLE,
+            alpha=0.30,
+        )
+        for resimulation in wealth_paths[:n_resimulations]:
+            wealth_ax.plot(
                 ticker_dates,
-                bands["q04"],
-                bands["q96"],
-                color=PREDICTION_PURPLE_LIGHT,
-                alpha=0.50,
-                label="92% predictive interval",
-            )
-            ax.fill_between(
-                ticker_dates,
-                bands["q16"],
-                bands["q84"],
+                resimulation,
                 color=PREDICTION_PURPLE,
-                alpha=0.30,
-                label="68% predictive interval",
+                linewidth=0.75,
+                alpha=0.14,
             )
-            for resimulation in simulated[:n_resimulations]:
-                ax.plot(
-                    ticker_dates,
-                    resimulation,
-                    color=PREDICTION_PURPLE,
-                    linewidth=0.65,
-                    alpha=0.13,
-                )
-            ax.plot(
-                ticker_dates,
-                bands["median"],
-                color=PREDICTION_PURPLE_DARK,
-                linewidth=1.5,
-                label="Predictive median",
-            )
-            ax.plot(
-                ticker_dates,
-                observed_series,
-                color=OBSERVED_COLOR,
-                linewidth=1.5,
-                label="Observed",
-            )
-            ax.set_title(f"{ticker}: {title}", fontsize=15)
-            ax.set_ylabel(ylabel, fontsize=14)
-            ax.set_xlabel("Date", fontsize=14)
-            ax.tick_params(axis="both", labelsize=12)
+        wealth_ax.plot(
+            ticker_dates,
+            wealth_bands["median"],
+            color=PREDICTION_PURPLE_DARK,
+            linewidth=1.8,
+        )
+        wealth_ax.plot(
+            ticker_dates,
+            observed_wealth,
+            color=OBSERVED_COLOR,
+            linewidth=1.8,
+        )
+        wealth_ax.set_title(f"{ticker}: Cumulative wealth", fontsize=17)
+        wealth_ax.set_ylabel("Growth of $1", fontsize=15)
+        wealth_ax.set_xlabel("Date", fontsize=15)
+        wealth_ax.tick_params(axis="both", labelsize=13)
 
         histogram_ax = axes[asset_id, 2]
         flattened_predictive = return_paths.reshape(-1)
@@ -320,29 +336,20 @@ def plot_posterior_predictive_checks(
             label="Observed",
         )
         histogram_ax.axvline(0.0, color="#636363", linewidth=0.8, alpha=0.7)
-        histogram_ax.set_title(f"{ticker}: Marginal returns", fontsize=15)
-        histogram_ax.set_xlabel(f"Daily return ({RETURN_UNIT})", fontsize=14)
-        histogram_ax.set_ylabel("Density", fontsize=14)
-        histogram_ax.tick_params(axis="both", labelsize=12)
-        histogram_ax.legend(frameon=False, fontsize=13)
+        histogram_ax.set_title(f"{ticker}: Marginal returns", fontsize=17)
+        histogram_ax.set_xlabel(f"Daily return ({RETURN_UNIT})", fontsize=15)
+        histogram_ax.set_ylabel("Density", fontsize=15)
+        histogram_ax.tick_params(axis="both", labelsize=13)
+        if asset_id == len(tickers) - 1:
+            histogram_ax.legend(frameon=False, fontsize=14, loc="upper left")
 
-    handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(
-        handles,
-        labels,
-        loc="lower center",
-        ncol=4,
-        frameon=False,
-        bbox_to_anchor=(0.5, -0.01),
-        fontsize=13,
-    )
-    fig.suptitle("Posterior Predictive Checks on the Latest 256-Day Window", fontsize=20)
-    fig.tight_layout(rect=(0.0, 0.04, 1.0, 0.96))
+    fig.suptitle("Posterior Predictive Checks on the Latest 256-Day Window", fontsize=22)
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
     return fig
 
 
 def plot_rolling_risk(
-    decisions: pd.DataFrame,
+    risk_estimates: pd.DataFrame,
     tickers: Sequence[str],
 ) -> plt.Figure:
     """Plot VaR and ES with posterior uncertainty and a historical benchmark."""
@@ -372,7 +379,7 @@ def plot_rolling_risk(
     )
 
     for row, ticker in enumerate(tickers):
-        frame = decisions.loc[decisions["ticker"] == ticker].sort_values("as_of")
+        frame = risk_estimates.loc[risk_estimates["ticker"] == ticker].sort_values("as_of")
         for col, (metric, lower, upper, benchmark, title) in enumerate(metric_specs):
             ax = axes[row, col]
             ax.fill_between(
@@ -397,14 +404,15 @@ def plot_rolling_risk(
                 linewidth=2.0,
                 linestyle="--",
                 alpha=0.82,
-                label="Historical simulation benchmark",
+                label="Historical simulation (past returns only)",
             )
             ax.set_title(f"{ticker}: {title}", fontsize=17)
             ax.set_ylabel("20-day loss (% of capital)", fontsize=15)
             if row == len(tickers) - 1:
                 ax.set_xlabel("Window end date", fontsize=15)
             ax.tick_params(axis="both", labelsize=12)
-            ax.legend(frameon=False, fontsize=13, loc="upper right")
+            if row == 0 and col == 0:
+                ax.legend(frameon=False, fontsize=13, loc="upper left")
 
     fig.suptitle(
         "Rolling 20-Day Downside Risk (256-Day Information Window)",

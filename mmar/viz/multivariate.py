@@ -318,7 +318,7 @@ def plot_multivariate_posterior_predictive_checks(
     assets: Sequence[str] = ASSET_NAMES,
     n_resimulations: int = 10,
 ) -> plt.Figure:
-    """Plot marginal and equal-weight PPCs from the same joint path draws."""
+    """Plot drawdown, wealth, and marginal-return PPCs from joint path draws."""
 
     assets = tuple(assets)
     paths = np.asarray(posterior_paths, dtype=np.float64)
@@ -341,73 +341,109 @@ def plot_multivariate_posterior_predictive_checks(
     )
 
     for target_id, target in enumerate(targets):
-        return_paths = 100.0 * paths[:, :, target_id]
+        target_paths = paths[:, :, target_id]
+        return_paths = 100.0 * target_paths
         observed_target = 100.0 * observed[:, target_id]
-        return_bands = _predictive_bands(return_paths)
-        wealth_paths = np.cumprod(1.0 + paths[:, :, target_id], axis=1)
+        wealth_paths = np.cumprod(1.0 + target_paths, axis=1)
         observed_wealth = np.cumprod(1.0 + observed[:, target_id])
         wealth_bands = _predictive_bands(wealth_paths)
 
-        for column, (simulated, actual, bands, ylabel, title) in enumerate(
-            (
-                (
-                    return_paths,
-                    observed_target,
-                    return_bands,
-                    "Daily return (%)",
-                    "Daily returns",
-                ),
-                (
-                    wealth_paths,
-                    observed_wealth,
-                    wealth_bands,
-                    "Growth of $1",
-                    "Cumulative wealth",
-                ),
-            )
-        ):
-            ax = axes[target_id, column]
-            ax.fill_between(
+        drawdown_ax = axes[target_id, 0]
+        predictive_drawdowns = 100.0 * max_drawdown_batch(target_paths)
+        observed_drawdown = float(
+            100.0 * max_drawdown_batch(observed[:, target_id][None, :])[0]
+        )
+        display_low, display_high = np.quantile(predictive_drawdowns, (0.001, 0.999))
+        display_low = min(float(display_low), observed_drawdown)
+        display_high = max(float(display_high), observed_drawdown)
+        padding = 0.04 * max(display_high - display_low, 1e-6)
+        drawdown_bins = np.linspace(
+            display_low - padding,
+            min(0.0, display_high + padding),
+            46,
+        )
+        outer_low, outer_high = np.quantile(predictive_drawdowns, (0.04, 0.96))
+        inner_low, inner_high = np.quantile(predictive_drawdowns, (0.16, 0.84))
+        drawdown_ax.axvspan(
+            outer_low,
+            outer_high,
+            color=PREDICTION_PURPLE,
+            alpha=0.14,
+            label="92% predictive interval",
+        )
+        drawdown_ax.axvspan(
+            inner_low,
+            inner_high,
+            color=PREDICTION_PURPLE,
+            alpha=0.26,
+            label="68% predictive interval",
+        )
+        drawdown_ax.hist(
+            predictive_drawdowns,
+            bins=drawdown_bins,
+            density=True,
+            color=PREDICTION_PURPLE,
+            edgecolor=PREDICTION_PURPLE_DARK,
+            linewidth=0.45,
+            alpha=0.55,
+        )
+        drawdown_ax.axvline(
+            np.median(predictive_drawdowns),
+            color=PREDICTION_PURPLE_DARK,
+            linewidth=1.8,
+            label="Predictive median",
+        )
+        drawdown_ax.axvline(
+            observed_drawdown,
+            color=OBSERVED_COLOR,
+            linewidth=2.4,
+            label="Observed",
+        )
+        drawdown_ax.set_title(f"{target}: Predicted maximum drawdown", fontsize=14)
+        drawdown_ax.set_xlabel("Maximum drawdown (%)", fontsize=12)
+        drawdown_ax.set_ylabel("Density", fontsize=12)
+        drawdown_ax.set_yticks([])
+        drawdown_ax.tick_params(labelsize=10)
+        drawdown_ax.grid(False, axis="y")
+
+        wealth_ax = axes[target_id, 1]
+        wealth_ax.fill_between(
+            dates,
+            wealth_bands["q04"],
+            wealth_bands["q96"],
+            color=PREDICTION_PURPLE,
+            alpha=0.16,
+        )
+        wealth_ax.fill_between(
+            dates,
+            wealth_bands["q16"],
+            wealth_bands["q84"],
+            color=PREDICTION_PURPLE,
+            alpha=0.28,
+        )
+        for resimulation in wealth_paths[:n_resimulations]:
+            wealth_ax.plot(
                 dates,
-                bands["q04"],
-                bands["q96"],
+                resimulation,
                 color=PREDICTION_PURPLE,
-                alpha=0.16,
-                label="92% predictive interval",
+                linewidth=0.6,
+                alpha=0.12,
             )
-            ax.fill_between(
-                dates,
-                bands["q16"],
-                bands["q84"],
-                color=PREDICTION_PURPLE,
-                alpha=0.28,
-                label="68% predictive interval",
-            )
-            for resimulation in simulated[:n_resimulations]:
-                ax.plot(
-                    dates,
-                    resimulation,
-                    color=PREDICTION_PURPLE,
-                    linewidth=0.6,
-                    alpha=0.12,
-                )
-            ax.plot(
-                dates,
-                bands["median"],
-                color=PREDICTION_PURPLE_DARK,
-                linewidth=1.5,
-                label="Predictive median",
-            )
-            ax.plot(
-                dates,
-                actual,
-                color=OBSERVED_COLOR,
-                linewidth=1.35,
-                label="Observed",
-            )
-            ax.set_title(f"{target}: {title}", fontsize=14)
-            ax.set_ylabel(ylabel, fontsize=12)
-            ax.tick_params(labelsize=10)
+        wealth_ax.plot(
+            dates,
+            wealth_bands["median"],
+            color=PREDICTION_PURPLE_DARK,
+            linewidth=1.5,
+        )
+        wealth_ax.plot(
+            dates,
+            observed_wealth,
+            color=OBSERVED_COLOR,
+            linewidth=1.35,
+        )
+        wealth_ax.set_title(f"{target}: Cumulative wealth", fontsize=14)
+        wealth_ax.set_ylabel("Growth of $1", fontsize=12)
+        wealth_ax.tick_params(labelsize=10)
 
         histogram_ax = axes[target_id, 2]
         flattened = return_paths.reshape(-1)
@@ -438,29 +474,18 @@ def plot_multivariate_posterior_predictive_checks(
         histogram_ax.set_title(f"{target}: Marginal returns", fontsize=14)
         histogram_ax.set_xlabel("Daily return (%)", fontsize=12)
         histogram_ax.set_yticks([])
-        histogram_ax.legend(frameon=False, fontsize=10)
-
-    handles, labels = axes[0, 0].get_legend_handles_labels()
-    fig.legend(
-        handles,
-        labels,
-        loc="lower center",
-        ncol=4,
-        frameon=False,
-        bbox_to_anchor=(0.5, -0.005),
-        fontsize=11,
-    )
+    axes[0, 0].legend(frameon=False, fontsize=11, loc="upper left")
     fig.suptitle(
         "Joint Posterior Predictive Checks: Assets and Equal-Weight Portfolio",
         fontsize=19,
         y=1.0,
     )
-    fig.tight_layout(rect=(0.0, 0.025, 1.0, 0.985))
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.985))
     return fig
 
 
 def plot_multivariate_rolling_risk(
-    decisions: pd.DataFrame,
+    risk_estimates: pd.DataFrame,
     targets: Sequence[str] = (*ASSET_NAMES, "EW"),
 ) -> plt.Figure:
     """Plot rolling posterior VaR/ES with uncertainty and historical benchmarks."""
@@ -490,7 +515,7 @@ def plot_multivariate_rolling_risk(
         squeeze=False,
     )
     for row, target in enumerate(targets):
-        frame = decisions.loc[decisions["target"] == target].sort_values("as_of")
+        frame = risk_estimates.loc[risk_estimates["target"] == target].sort_values("as_of")
         for column, (metric, lower, upper, benchmark, title) in enumerate(metric_specs):
             ax = axes[row, column]
             ax.fill_between(
@@ -515,12 +540,13 @@ def plot_multivariate_rolling_risk(
                 linewidth=1.8,
                 linestyle="--",
                 alpha=0.82,
-                label="Historical simulation",
+                label="Historical simulation (past returns only)",
             )
             ax.set_title(f"{target}: {title}", fontsize=15)
             ax.set_ylabel("20-day loss (% of capital)", fontsize=12)
             ax.tick_params(labelsize=10)
-            ax.legend(frameon=False, fontsize=10, loc="upper right")
+            if row == 0 and column == 0:
+                ax.legend(frameon=False, fontsize=10, loc="upper left")
     fig.suptitle(
         "Rolling Joint-MMAR Downside Risk (256-Day Information Window)",
         fontsize=20,
@@ -536,9 +562,9 @@ def plot_model_allocation_backtest(
     selected_fee: float = 5.0,
     assets: Sequence[str] = ASSET_NAMES,
     initial_wealth: float = 256.0,
-    figsize: tuple = (12, 8.5)
+    figsize: tuple = (16, 9),
 ) -> plt.Figure:
-    """Plot net wealth by fee plus model weights and cumulative turnover."""
+    """Plot net wealth, held weights, and total portfolio value reallocated."""
 
     assets = tuple(assets)
     fees = tuple(float(fee) for fee in fee_levels)
@@ -584,7 +610,8 @@ def plot_model_allocation_backtest(
                 label=strategy,
             )
         ax.axhline(initial_wealth, color="0.55", linewidth=0.8, alpha=0.7)
-        ax.set_title(f"{fee:g} bp per unit of one-way turnover", fontsize=14)
+        fee_title = "No trading costs" if fee == 0.0 else f"{fee:g} bp trading cost"
+        ax.set_title(fee_title, fontsize=14)
         ax.set_ylabel("Portfolio value ($)", fontsize=12)
         ax.tick_params(axis="x", rotation=25, labelsize=9)
         ax.grid(axis="y", alpha=0.18)
@@ -631,15 +658,21 @@ def plot_model_allocation_backtest(
             linewidth=2.0,
             label=strategy.replace("MMAR tail utility ", ""),
         )
-    turnover_ax.set_title(f"Cumulative turnover ({selected:g} bp case)", fontsize=14)
-    turnover_ax.set_ylabel("One-way portfolio turnover", fontsize=12)
+    turnover_ax.set_title(
+        f"Total traded over time ({selected:g} bp case)\n"
+        "1.0 = one portfolio's value reallocated",
+        fontsize=14,
+    )
+    turnover_ax.set_ylabel("Portfolio equivalents traded", fontsize=12)
     turnover_ax.legend(frameon=False, fontsize=9)
     turnover_ax.tick_params(axis="x", rotation=25, labelsize=9)
     turnover_ax.grid(axis="y", alpha=0.18)
 
     fig.suptitle(
-        "Walk-Forward MMAR Allocation vs. Buy-and-Hold Benchmarks",
+        "Walk-Forward Portfolio Value After Trading Costs\n"
+        "Daily and 21-Day MMAR Rebalancing vs. Buy-and-Hold Benchmarks",
         fontsize=20,
+        y=0.99,
     )
-    fig.subplots_adjust(top=0.93, bottom=0.08)
+    fig.subplots_adjust(top=0.86, bottom=0.08)
     return fig

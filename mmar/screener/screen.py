@@ -26,12 +26,12 @@ def infer_parameters(approximator, series, num_samples=512, batch_size=32, seed=
         raise ValueError("Expected raw decimal returns with shape (stocks, 256, 1).")
     start = perf_counter()
     draws = approximator.sample(
-        conditions={"series": series},
+        conditions={"returns": series},
         num_samples=num_samples,
         batch_size=batch_size,
         seed=seed,
     )
-    return model.stack_parameters(draws), perf_counter() - start
+    return model.stack_samples(draws), perf_counter() - start
 
 
 def conditional_metrics(terminal_returns, rule):
