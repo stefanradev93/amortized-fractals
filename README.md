@@ -3,8 +3,9 @@
 This demonstrates an end-to-end amortized Bayesian workflow for **Multifractal Models of Asset Returns (MMAR)**.
 We will train neural posterior estimators on simulated markets, then reuse them across rolling $T$-day windows to estimate parameters, simulate wealth paths, and quantify downside risk from real market returns.
 
-- [Univariate · SPMO / VOO](mmar_bayesian_workflow_final.ipynb) ·
-- [Multivariate · VOO / GLD / TLT](mmar_multivariate_bayesian_workflow.ipynb)
+- [Univariate · SPMO / VOO](mmar_univariate.ipynb) ·
+- [Multivariate · VOO / GLD / TLT](mmar_multivariate.ipynb)
+- [Stock screener · up to 500 S&P stocks](mmar_stock_screener.ipynb) · CPU deployment, no training
 
 ## From a cascade to market returns
 
@@ -88,6 +89,21 @@ python -m pip install -e .
 KERAS_BACKEND=torch jupyter lab
 ```
 
-Each notebook defines its workflow explicitly. **Run All trains**; stop before *Amortized inference* for prior checks only. New checkpoints are timestamped, market returns are cached in `data/`, and all figures are saved in `figures/`. Models and plotting/decision helpers live in [`mmar/`](mmar/).
+The two workflow notebooks define their workflows explicitly. **Run All trains** in those notebooks; stop before *Amortized inference* for prior checks only. The screener only loads a saved model. Market returns are cached in `data/`, and all figures are saved in `figures/`. Models and plotting/decision helpers live in [`mmar/`](mmar/).
 
 Regenerate the animation with `python -m mmar.viz.cascade`.
+
+### Stock screener
+
+Run [`mmar_stock_screener.ipynb`](mmar_stock_screener.ipynb) from the repo root. It imports
+BayesFlow before loading `checkpoints/univariate/model.keras`, then sends raw returns as
+one `(stocks, 256, 1)` batch. Set the checkpoint path and round-trip cost at the top.
+Downloads are cached in `data/screener/`; figures, the ranked table, exclusions and
+predictive checks are saved in `figures/screener/`.
+
+Stocks are ranked by **gain probability (%) / expected shortfall (%)** over 20 trading days.
+Gain includes 0.20% round-trip costs; shortfall measures the average gross loss in the worst
+5% of outcomes. A 70% gain probability with 10% shortfall gives a score of 7. Higher is better.
+Fit flags compare observed return summaries with simulated ranges and remain visible beside
+each rank. The fit plot shows wealth, daily returns and maximum drawdown, with observations
+in black. Simulations use current constituents and fresh cascade phases.

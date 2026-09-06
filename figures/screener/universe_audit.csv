@@ -1,0 +1,504 @@
+ticker,name,sector,membership_snapshot,status
+A,Agilent Technologies,Health Care,2026-09-06,screened
+AAPL,Apple Inc.,Information Technology,2026-09-06,screened
+ABBV,AbbVie,Health Care,2026-09-06,screened
+ABNB,Airbnb,Consumer Discretionary,2026-09-06,screened
+ABT,Abbott Laboratories,Health Care,2026-09-06,screened
+ACGL,Arch Capital Group,Financials,2026-09-06,screened
+ACN,Accenture,Information Technology,2026-09-06,screened
+ADBE,Adobe Inc.,Information Technology,2026-09-06,screened
+ADI,Analog Devices,Information Technology,2026-09-06,screened
+ADM,Archer Daniels Midland,Consumer Staples,2026-09-06,screened
+ADP,Automatic Data Processing,Industrials,2026-09-06,screened
+ADSK,Autodesk,Information Technology,2026-09-06,screened
+AEE,Ameren,Utilities,2026-09-06,screened
+AEP,American Electric Power,Utilities,2026-09-06,screened
+AES,AES Corporation,Utilities,2026-09-06,screened
+AFL,Aflac,Financials,2026-09-06,screened
+AIG,American International Group,Financials,2026-09-06,screened
+AIZ,Assurant,Financials,2026-09-06,screened
+AJG,Arthur J. Gallagher & Co.,Financials,2026-09-06,screened
+AKAM,Akamai Technologies,Information Technology,2026-09-06,screened
+ALB,Albemarle Corporation,Materials,2026-09-06,screened
+ALGN,Align Technology,Health Care,2026-09-06,screened
+ALL,Allstate,Financials,2026-09-06,screened
+ALLE,Allegion,Industrials,2026-09-06,screened
+AMAT,Applied Materials,Information Technology,2026-09-06,screened
+AMCR,Amcor,Materials,2026-09-06,screened
+AMD,Advanced Micro Devices,Information Technology,2026-09-06,screened
+AME,Ametek,Industrials,2026-09-06,screened
+AMGN,Amgen,Health Care,2026-09-06,screened
+AMP,Ameriprise Financial,Financials,2026-09-06,screened
+AMT,American Tower,Real Estate,2026-09-06,screened
+AMZN,Amazon,Consumer Discretionary,2026-09-06,screened
+ANET,Arista Networks,Information Technology,2026-09-06,screened
+AON,Aon plc,Financials,2026-09-06,screened
+AOS,A. O. Smith,Industrials,2026-09-06,screened
+APA,APA Corporation,Energy,2026-09-06,screened
+APD,Air Products,Materials,2026-09-06,screened
+APH,Amphenol,Information Technology,2026-09-06,screened
+APO,Apollo Global Management,Financials,2026-09-06,screened
+APP,AppLovin,Communication Services,2026-09-06,screened
+APTV,Aptiv,Consumer Discretionary,2026-09-06,screened
+ARE,Alexandria Real Estate Equities,Real Estate,2026-09-06,screened
+ARES,Ares Management,Financials,2026-09-06,screened
+ATO,Atmos Energy,Utilities,2026-09-06,screened
+AVGO,Broadcom,Information Technology,2026-09-06,screened
+AVY,Avery Dennison,Materials,2026-09-06,screened
+AWK,American Water Works,Utilities,2026-09-06,screened
+AXON,Axon Enterprise,Industrials,2026-09-06,screened
+AXP,American Express,Financials,2026-09-06,screened
+AZO,AutoZone,Consumer Discretionary,2026-09-06,screened
+BA,Boeing,Industrials,2026-09-06,screened
+BAC,Bank of America,Financials,2026-09-06,screened
+BALL,Ball Corporation,Materials,2026-09-06,screened
+BAX,Baxter International,Health Care,2026-09-06,screened
+BBY,Best Buy,Consumer Discretionary,2026-09-06,screened
+BDX,Becton Dickinson,Health Care,2026-09-06,screened
+BEN,Franklin Resources,Financials,2026-09-06,screened
+BF-B,Brown–Forman,Consumer Staples,2026-09-06,screened
+BG,Bunge Global,Consumer Staples,2026-09-06,screened
+BIIB,Biogen,Health Care,2026-09-06,screened
+BKNG,Booking Holdings,Consumer Discretionary,2026-09-06,screened
+BKR,Baker Hughes,Energy,2026-09-06,screened
+BLDR,Builders FirstSource,Industrials,2026-09-06,screened
+BLK,BlackRock,Financials,2026-09-06,screened
+BMY,Bristol Myers Squibb,Health Care,2026-09-06,screened
+BNY,BNY Mellon,Financials,2026-09-06,screened
+BR,Broadridge Financial Solutions,Industrials,2026-09-06,screened
+BRK-B,Berkshire Hathaway,Financials,2026-09-06,screened
+BRO,Brown & Brown,Financials,2026-09-06,screened
+BSX,Boston Scientific,Health Care,2026-09-06,screened
+BX,Blackstone Inc.,Financials,2026-09-06,screened
+BXP,"BXP, Inc.",Real Estate,2026-09-06,screened
+C,Citigroup,Financials,2026-09-06,screened
+CAH,Cardinal Health,Health Care,2026-09-06,screened
+CARR,Carrier Global,Industrials,2026-09-06,screened
+CASY,Casey's,Consumer Staples,2026-09-06,screened
+CAT,Caterpillar Inc.,Industrials,2026-09-06,screened
+CB,Chubb Limited,Financials,2026-09-06,screened
+CBOE,Cboe Global Markets,Financials,2026-09-06,screened
+CBRE,CBRE Group,Real Estate,2026-09-06,screened
+CCI,Crown Castle,Real Estate,2026-09-06,screened
+CCL,Carnival Corporation,Consumer Discretionary,2026-09-06,screened
+CDNS,Cadence Design Systems,Information Technology,2026-09-06,screened
+CDW,CDW Corporation,Information Technology,2026-09-06,screened
+CEG,Constellation Energy,Utilities,2026-09-06,screened
+CF,CF Industries,Materials,2026-09-06,screened
+CFG,Citizens Financial Group,Financials,2026-09-06,screened
+CHD,Church & Dwight,Consumer Staples,2026-09-06,screened
+CHRW,C.H. Robinson,Industrials,2026-09-06,screened
+CHTR,Charter Communications,Communication Services,2026-09-06,screened
+CI,Cigna,Health Care,2026-09-06,screened
+CIEN,Ciena,Information Technology,2026-09-06,screened
+CINF,Cincinnati Financial,Financials,2026-09-06,screened
+CL,Colgate-Palmolive,Consumer Staples,2026-09-06,screened
+CLX,Clorox,Consumer Staples,2026-09-06,screened
+CMCSA,Comcast,Communication Services,2026-09-06,screened
+CME,CME Group,Financials,2026-09-06,screened
+CMG,Chipotle Mexican Grill,Consumer Discretionary,2026-09-06,screened
+CMI,Cummins,Industrials,2026-09-06,screened
+CMS,CMS Energy,Utilities,2026-09-06,screened
+CNC,Centene Corporation,Health Care,2026-09-06,screened
+CNP,CenterPoint Energy,Utilities,2026-09-06,screened
+COF,Capital One,Financials,2026-09-06,screened
+COHR,Coherent Corp.,Information Technology,2026-09-06,screened
+COIN,Coinbase,Financials,2026-09-06,screened
+COO,Cooper Companies (The),Health Care,2026-09-06,screened
+COP,ConocoPhillips,Energy,2026-09-06,screened
+COR,Cencora,Health Care,2026-09-06,screened
+COST,Costco,Consumer Staples,2026-09-06,screened
+CPAY,Corpay,Financials,2026-09-06,screened
+CPRT,Copart,Industrials,2026-09-06,screened
+CPT,Camden Property Trust,Real Estate,2026-09-06,screened
+CRH,CRH plc,Materials,2026-09-06,screened
+CRL,Charles River Laboratories,Health Care,2026-09-06,screened
+CRM,Salesforce,Information Technology,2026-09-06,screened
+CRWD,CrowdStrike,Information Technology,2026-09-06,screened
+CSCO,Cisco,Information Technology,2026-09-06,screened
+CSGP,CoStar Group,Real Estate,2026-09-06,screened
+CSX,CSX Corporation,Industrials,2026-09-06,screened
+CTAS,Cintas,Industrials,2026-09-06,screened
+CTSH,Cognizant,Information Technology,2026-09-06,screened
+CTVA,Corteva,Materials,2026-09-06,screened
+CVNA,Carvana,Consumer Discretionary,2026-09-06,screened
+CVS,CVS Health,Health Care,2026-09-06,screened
+CVX,Chevron Corporation,Energy,2026-09-06,screened
+D,Dominion Energy,Utilities,2026-09-06,screened
+DAL,Delta Air Lines,Industrials,2026-09-06,screened
+DASH,DoorDash,Consumer Discretionary,2026-09-06,screened
+DD,DuPont,Industrials,2026-09-06,screened
+DDOG,Datadog,Information Technology,2026-09-06,screened
+DE,Deere & Company,Industrials,2026-09-06,screened
+DECK,Deckers Brands,Consumer Discretionary,2026-09-06,screened
+DELL,Dell Technologies,Information Technology,2026-09-06,screened
+DG,Dollar General,Consumer Staples,2026-09-06,screened
+DGX,Quest Diagnostics,Health Care,2026-09-06,screened
+DHI,D. R. Horton,Consumer Discretionary,2026-09-06,screened
+DHR,Danaher Corporation,Health Care,2026-09-06,screened
+DIS,Walt Disney Company (The),Communication Services,2026-09-06,screened
+DLR,Digital Realty,Real Estate,2026-09-06,screened
+DLTR,Dollar Tree,Consumer Staples,2026-09-06,screened
+DOC,Healthpeak Properties,Real Estate,2026-09-06,screened
+DOV,Dover Corporation,Industrials,2026-09-06,screened
+DOW,Dow Inc.,Materials,2026-09-06,screened
+DPZ,Domino's,Consumer Discretionary,2026-09-06,screened
+DRI,Darden Restaurants,Consumer Discretionary,2026-09-06,screened
+DTE,DTE Energy,Utilities,2026-09-06,screened
+DUK,Duke Energy,Utilities,2026-09-06,screened
+DVA,DaVita,Health Care,2026-09-06,screened
+DVN,Devon Energy,Energy,2026-09-06,screened
+DXCM,Dexcom,Health Care,2026-09-06,screened
+EBAY,eBay Inc.,Consumer Discretionary,2026-09-06,screened
+ECHO,EchoStar,Communication Services,2026-09-06,screened
+ECL,Ecolab,Materials,2026-09-06,screened
+ED,Consolidated Edison,Utilities,2026-09-06,screened
+EFX,Equifax,Industrials,2026-09-06,screened
+EG,Everest Group,Financials,2026-09-06,screened
+EIX,Edison International,Utilities,2026-09-06,screened
+EL,Estée Lauder Companies (The),Consumer Staples,2026-09-06,screened
+ELV,Elevance Health,Health Care,2026-09-06,screened
+EME,Emcor,Industrials,2026-09-06,screened
+EMR,Emerson Electric,Industrials,2026-09-06,screened
+EOG,EOG Resources,Energy,2026-09-06,screened
+EQIX,Equinix,Real Estate,2026-09-06,screened
+EQT,EQT Corporation,Energy,2026-09-06,screened
+ERIE,Erie Indemnity,Financials,2026-09-06,screened
+ES,Eversource Energy,Utilities,2026-09-06,screened
+ESS,Essex Property Trust,Real Estate,2026-09-06,screened
+ETN,Eaton Corporation,Industrials,2026-09-06,screened
+ETR,Entergy,Utilities,2026-09-06,screened
+EVRG,Evergy,Utilities,2026-09-06,screened
+EW,Edwards Lifesciences,Health Care,2026-09-06,screened
+EXC,Exelon,Utilities,2026-09-06,screened
+EXE,Expand Energy,Energy,2026-09-06,screened
+EXPD,Expeditors International,Industrials,2026-09-06,screened
+EXPE,Expedia Group,Consumer Discretionary,2026-09-06,screened
+EXR,Extra Space Storage,Real Estate,2026-09-06,screened
+F,Ford Motor Company,Consumer Discretionary,2026-09-06,screened
+FANG,Diamondback Energy,Energy,2026-09-06,screened
+FAST,Fastenal,Industrials,2026-09-06,screened
+FCX,Freeport-McMoRan,Materials,2026-09-06,screened
+FDS,FactSet,Financials,2026-09-06,screened
+FDX,FedEx,Industrials,2026-09-06,screened
+FDXF,FedEx Freight,Industrials,2026-09-06,missing/invalid price history
+FE,FirstEnergy,Utilities,2026-09-06,screened
+FERG,Ferguson Enterprises,Industrials,2026-09-06,screened
+FFIV,"F5, Inc.",Information Technology,2026-09-06,screened
+FICO,Fair Isaac,Information Technology,2026-09-06,screened
+FIS,Fidelity National Information Services,Financials,2026-09-06,screened
+FISV,Fiserv,Financials,2026-09-06,missing/invalid price history
+FITB,Fifth Third Bancorp,Financials,2026-09-06,screened
+FIX,Comfort Systems USA,Industrials,2026-09-06,screened
+FLEX,Flex Ltd.,Information Technology,2026-09-06,screened
+FOX,Fox Corporation (Class B),Communication Services,2026-09-06,screened
+FOXA,Fox Corporation (Class A),Communication Services,2026-09-06,screened
+FRT,Federal Realty Investment Trust,Real Estate,2026-09-06,screened
+FSLR,First Solar,Information Technology,2026-09-06,screened
+FTNT,Fortinet,Information Technology,2026-09-06,screened
+FTV,Fortive,Industrials,2026-09-06,screened
+GD,General Dynamics,Industrials,2026-09-06,screened
+GDDY,GoDaddy,Information Technology,2026-09-06,screened
+GE,GE Aerospace,Industrials,2026-09-06,screened
+GEHC,GE HealthCare,Health Care,2026-09-06,screened
+GEN,Gen Digital,Information Technology,2026-09-06,screened
+GEV,GE Vernova,Industrials,2026-09-06,screened
+GILD,Gilead Sciences,Health Care,2026-09-06,screened
+GIS,General Mills,Consumer Staples,2026-09-06,screened
+GL,Globe Life,Financials,2026-09-06,screened
+GLW,Corning Inc.,Information Technology,2026-09-06,screened
+GM,General Motors,Consumer Discretionary,2026-09-06,screened
+GNRC,Generac,Industrials,2026-09-06,screened
+GOOG,Alphabet Inc. (Class C),Communication Services,2026-09-06,screened
+GOOGL,Alphabet Inc. (Class A),Communication Services,2026-09-06,screened
+GPC,Genuine Parts Company,Consumer Discretionary,2026-09-06,screened
+GPN,Global Payments,Financials,2026-09-06,screened
+GRMN,Garmin,Consumer Discretionary,2026-09-06,screened
+GS,Goldman Sachs,Financials,2026-09-06,screened
+GWW,W. W. Grainger,Industrials,2026-09-06,screened
+HAL,Halliburton,Energy,2026-09-06,screened
+HAS,Hasbro,Consumer Discretionary,2026-09-06,screened
+HBAN,Huntington Bancshares,Financials,2026-09-06,screened
+HCA,HCA Healthcare,Health Care,2026-09-06,screened
+HD,Home Depot (The),Consumer Discretionary,2026-09-06,screened
+HIG,Hartford (The),Financials,2026-09-06,screened
+HII,Huntington Ingalls Industries,Industrials,2026-09-06,screened
+HLT,Hilton Worldwide,Consumer Discretionary,2026-09-06,screened
+HON,Honeywell Technologies,Industrials,2026-09-06,screened
+HONA,Honeywell Aerospace,Industrials,2026-09-06,missing/invalid price history
+HOOD,Robinhood Markets,Financials,2026-09-06,screened
+HPE,Hewlett Packard Enterprise,Information Technology,2026-09-06,screened
+HPQ,HP Inc.,Information Technology,2026-09-06,screened
+HRL,Hormel Foods,Consumer Staples,2026-09-06,screened
+HSIC,Henry Schein,Health Care,2026-09-06,screened
+HST,Host Hotels & Resorts,Real Estate,2026-09-06,screened
+HSY,Hershey Company (The),Consumer Staples,2026-09-06,screened
+HUBB,Hubbell Incorporated,Industrials,2026-09-06,screened
+HUM,Humana,Health Care,2026-09-06,screened
+HWM,Howmet Aerospace,Industrials,2026-09-06,screened
+IBKR,Interactive Brokers,Financials,2026-09-06,screened
+IBM,IBM,Information Technology,2026-09-06,screened
+ICE,Intercontinental Exchange,Financials,2026-09-06,screened
+IDXX,Idexx Laboratories,Health Care,2026-09-06,screened
+IEX,IDEX Corporation,Industrials,2026-09-06,screened
+IFF,International Flavors & Fragrances,Materials,2026-09-06,screened
+INCY,Incyte,Health Care,2026-09-06,screened
+INTC,Intel,Information Technology,2026-09-06,screened
+INTU,Intuit,Information Technology,2026-09-06,screened
+INVH,Invitation Homes,Real Estate,2026-09-06,screened
+IP,International Paper,Materials,2026-09-06,screened
+IQV,IQVIA,Health Care,2026-09-06,screened
+IR,Ingersoll Rand,Industrials,2026-09-06,screened
+IRM,Iron Mountain,Real Estate,2026-09-06,screened
+ISRG,Intuitive Surgical,Health Care,2026-09-06,screened
+IT,Gartner,Information Technology,2026-09-06,screened
+ITW,Illinois Tool Works,Industrials,2026-09-06,screened
+IVZ,Invesco,Financials,2026-09-06,screened
+J,Jacobs Solutions,Industrials,2026-09-06,screened
+JBHT,J.B. Hunt,Industrials,2026-09-06,screened
+JBL,Jabil,Information Technology,2026-09-06,screened
+JCI,Johnson Controls,Industrials,2026-09-06,screened
+JKHY,Jack Henry & Associates,Financials,2026-09-06,screened
+JNJ,Johnson & Johnson,Health Care,2026-09-06,screened
+JPM,JPMorgan Chase,Financials,2026-09-06,screened
+KDP,Keurig Dr Pepper,Consumer Staples,2026-09-06,screened
+KEY,KeyCorp,Financials,2026-09-06,screened
+KEYS,Keysight Technologies,Information Technology,2026-09-06,screened
+KHC,Kraft Heinz,Consumer Staples,2026-09-06,screened
+KIM,Kimco Realty,Real Estate,2026-09-06,screened
+KKR,KKR & Co.,Financials,2026-09-06,screened
+KLAC,KLA Corporation,Information Technology,2026-09-06,screened
+KMB,Kimberly-Clark,Consumer Staples,2026-09-06,screened
+KMI,Kinder Morgan,Energy,2026-09-06,screened
+KO,Coca-Cola Company (The),Consumer Staples,2026-09-06,screened
+KR,Kroger,Consumer Staples,2026-09-06,screened
+KVUE,Kenvue,Consumer Staples,2026-09-06,screened
+L,Loews Corporation,Financials,2026-09-06,screened
+LDOS,Leidos,Industrials,2026-09-06,screened
+LEN,Lennar,Consumer Discretionary,2026-09-06,screened
+LH,Labcorp,Health Care,2026-09-06,screened
+LHX,L3Harris,Industrials,2026-09-06,screened
+LII,Lennox International,Industrials,2026-09-06,screened
+LIN,Linde plc,Materials,2026-09-06,screened
+LITE,Lumentum,Information Technology,2026-09-06,screened
+LLY,Lilly (Eli),Health Care,2026-09-06,screened
+LMT,Lockheed Martin,Industrials,2026-09-06,screened
+LNT,Alliant Energy,Utilities,2026-09-06,screened
+LOW,Lowe's,Consumer Discretionary,2026-09-06,screened
+LRCX,Lam Research,Information Technology,2026-09-06,screened
+LULU,Lululemon Athletica,Consumer Discretionary,2026-09-06,screened
+LUV,Southwest Airlines,Industrials,2026-09-06,screened
+LVS,Las Vegas Sands,Consumer Discretionary,2026-09-06,screened
+LYB,LyondellBasell,Materials,2026-09-06,screened
+LYV,Live Nation Entertainment,Communication Services,2026-09-06,screened
+MA,Mastercard,Financials,2026-09-06,screened
+MAA,Mid-America Apartment Communities,Real Estate,2026-09-06,screened
+MAR,Marriott International,Consumer Discretionary,2026-09-06,screened
+MAS,Masco,Industrials,2026-09-06,screened
+MCD,McDonald's,Consumer Discretionary,2026-09-06,screened
+MCHP,Microchip Technology,Information Technology,2026-09-06,screened
+MCK,McKesson Corporation,Health Care,2026-09-06,screened
+MCO,Moody's Corporation,Financials,2026-09-06,screened
+MDLZ,Mondelez International,Consumer Staples,2026-09-06,screened
+MDT,Medtronic,Health Care,2026-09-06,screened
+MET,MetLife,Financials,2026-09-06,screened
+META,Meta Platforms,Communication Services,2026-09-06,screened
+MGM,MGM Resorts,Consumer Discretionary,2026-09-06,screened
+MKC,McCormick & Company,Consumer Staples,2026-09-06,screened
+MLM,Martin Marietta Materials,Materials,2026-09-06,screened
+MMM,3M,Industrials,2026-09-06,screened
+MNST,Monster Beverage,Consumer Staples,2026-09-06,screened
+MO,Altria,Consumer Staples,2026-09-06,screened
+MOS,Mosaic Company (The),Materials,2026-09-06,screened
+MPC,Marathon Petroleum,Energy,2026-09-06,screened
+MPWR,Monolithic Power Systems,Information Technology,2026-09-06,screened
+MRK,Merck & Co.,Health Care,2026-09-06,screened
+MRNA,Moderna,Health Care,2026-09-06,screened
+MRSH,Marsh McLennan,Financials,2026-09-06,screened
+MRVL,Marvell Technology,Information Technology,2026-09-06,screened
+MS,Morgan Stanley,Financials,2026-09-06,screened
+MSCI,MSCI,Financials,2026-09-06,screened
+MSFT,Microsoft,Information Technology,2026-09-06,screened
+MSI,Motorola Solutions,Information Technology,2026-09-06,screened
+MTB,M&T Bank,Financials,2026-09-06,screened
+MTD,Mettler Toledo,Health Care,2026-09-06,screened
+MU,Micron Technology,Information Technology,2026-09-06,screened
+NCLH,Norwegian Cruise Line Holdings,Consumer Discretionary,2026-09-06,screened
+NDAQ,"Nasdaq, Inc.",Financials,2026-09-06,screened
+NDSN,Nordson Corporation,Industrials,2026-09-06,screened
+NEE,NextEra Energy,Utilities,2026-09-06,screened
+NEM,Newmont,Materials,2026-09-06,screened
+NFLX,Netflix,Communication Services,2026-09-06,screened
+NI,NiSource,Utilities,2026-09-06,screened
+NKE,"Nike, Inc.",Consumer Discretionary,2026-09-06,screened
+NOC,Northrop Grumman,Industrials,2026-09-06,screened
+NOW,ServiceNow,Information Technology,2026-09-06,screened
+NRG,NRG Energy,Utilities,2026-09-06,screened
+NSC,Norfolk Southern,Industrials,2026-09-06,screened
+NTAP,NetApp,Information Technology,2026-09-06,screened
+NTRS,Northern Trust,Financials,2026-09-06,screened
+NUE,Nucor,Materials,2026-09-06,screened
+NVDA,Nvidia,Information Technology,2026-09-06,screened
+NVR,"NVR, Inc.",Consumer Discretionary,2026-09-06,screened
+NWS,News Corp (Class B),Communication Services,2026-09-06,screened
+NWSA,News Corp (Class A),Communication Services,2026-09-06,screened
+NXPI,NXP Semiconductors,Information Technology,2026-09-06,screened
+O,Realty Income,Real Estate,2026-09-06,screened
+ODFL,Old Dominion,Industrials,2026-09-06,screened
+OKE,Oneok,Energy,2026-09-06,screened
+OMC,Omnicom Group,Communication Services,2026-09-06,screened
+ON,ON Semiconductor,Information Technology,2026-09-06,screened
+ORCL,Oracle Corporation,Information Technology,2026-09-06,screened
+ORLY,O'Reilly Automotive,Consumer Discretionary,2026-09-06,screened
+OTIS,Otis Worldwide,Industrials,2026-09-06,screened
+OXY,Occidental Petroleum,Energy,2026-09-06,screened
+PANW,Palo Alto Networks,Information Technology,2026-09-06,screened
+PAYX,Paychex,Industrials,2026-09-06,screened
+PCAR,Paccar,Industrials,2026-09-06,screened
+PCG,PG&E Corporation,Utilities,2026-09-06,screened
+PEG,Public Service Enterprise Group,Utilities,2026-09-06,screened
+PEP,PepsiCo,Consumer Staples,2026-09-06,screened
+PFE,Pfizer,Health Care,2026-09-06,screened
+PFG,Principal Financial Group,Financials,2026-09-06,screened
+PG,Procter & Gamble,Consumer Staples,2026-09-06,screened
+PGR,Progressive Corporation,Financials,2026-09-06,screened
+PH,Parker Hannifin,Industrials,2026-09-06,screened
+PHM,PulteGroup,Consumer Discretionary,2026-09-06,screened
+PKG,Packaging Corporation of America,Materials,2026-09-06,screened
+PLD,Prologis,Real Estate,2026-09-06,screened
+PLTR,Palantir Technologies,Information Technology,2026-09-06,screened
+PM,Philip Morris International,Consumer Staples,2026-09-06,screened
+PNC,PNC Financial Services,Financials,2026-09-06,screened
+PNR,Pentair,Industrials,2026-09-06,screened
+PNW,Pinnacle West Capital,Utilities,2026-09-06,screened
+PODD,Insulet Corporation,Health Care,2026-09-06,screened
+PPG,PPG Industries,Materials,2026-09-06,screened
+PPL,PPL Corporation,Utilities,2026-09-06,screened
+PRU,Prudential Financial,Financials,2026-09-06,screened
+PSA,Public Storage,Real Estate,2026-09-06,screened
+PSKY,Paramount Skydance Corporation,Communication Services,2026-09-06,screened
+PSX,Phillips 66,Energy,2026-09-06,screened
+PTC,PTC Inc.,Information Technology,2026-09-06,screened
+PWR,Quanta Services,Industrials,2026-09-06,screened
+PYPL,PayPal,Financials,2026-09-06,screened
+Q,Qnity Electronics,Information Technology,2026-09-06,missing/invalid price history
+QCOM,Qualcomm,Information Technology,2026-09-06,screened
+RCL,Royal Caribbean Group,Consumer Discretionary,2026-09-06,screened
+RDDT,Reddit,Communication Services,2026-09-06,screened
+REG,Regency Centers,Real Estate,2026-09-06,screened
+REGN,Regeneron Pharmaceuticals,Health Care,2026-09-06,screened
+RF,Regions Financial Corporation,Financials,2026-09-06,screened
+RJF,Raymond James Financial,Financials,2026-09-06,screened
+RL,Ralph Lauren Corporation,Consumer Discretionary,2026-09-06,screened
+RMD,ResMed|,Health Care,2026-09-06,screened
+ROK,Rockwell Automation,Industrials,2026-09-06,screened
+ROL,"Rollins, Inc.",Industrials,2026-09-06,screened
+ROP,Roper Technologies,Information Technology,2026-09-06,screened
+ROST,Ross Stores,Consumer Discretionary,2026-09-06,screened
+RSG,Republic Services,Industrials,2026-09-06,screened
+RTX,RTX Corporation,Industrials,2026-09-06,screened
+RVTY,Revvity,Health Care,2026-09-06,screened
+SBAC,SBA Communications,Real Estate,2026-09-06,screened
+SBUX,Starbucks,Consumer Discretionary,2026-09-06,screened
+SCHW,Charles Schwab Corporation,Financials,2026-09-06,screened
+SHW,Sherwin-Williams,Materials,2026-09-06,screened
+SJM,J.M. Smucker Company (The),Consumer Staples,2026-09-06,screened
+SLB,Schlumberger,Energy,2026-09-06,screened
+SMCI,Supermicro,Information Technology,2026-09-06,screened
+SNA,Snap-on,Industrials,2026-09-06,screened
+SNDK,Sandisk,Information Technology,2026-09-06,screened
+SNPS,Synopsys,Information Technology,2026-09-06,screened
+SO,Southern Company,Utilities,2026-09-06,screened
+SOLV,Solventum,Health Care,2026-09-06,screened
+SPG,Simon Property Group,Real Estate,2026-09-06,screened
+SPGI,S&P Global,Financials,2026-09-06,screened
+SRE,Sempra,Utilities,2026-09-06,screened
+STE,Steris,Health Care,2026-09-06,screened
+STLD,Steel Dynamics,Materials,2026-09-06,screened
+STT,State Street Corporation,Financials,2026-09-06,screened
+STX,Seagate Technology,Information Technology,2026-09-06,screened
+STZ,Constellation Brands,Consumer Staples,2026-09-06,screened
+SW,Smurfit Westrock,Materials,2026-09-06,screened
+SWK,Stanley Black & Decker,Industrials,2026-09-06,screened
+SWKS,Skyworks Solutions,Information Technology,2026-09-06,screened
+SYF,Synchrony Financial,Financials,2026-09-06,screened
+SYK,Stryker Corporation,Health Care,2026-09-06,screened
+SYY,Sysco,Consumer Staples,2026-09-06,screened
+T,AT&T,Communication Services,2026-09-06,screened
+TAP,Molson Coors Beverage Company,Consumer Staples,2026-09-06,screened
+TDG,TransDigm Group,Industrials,2026-09-06,screened
+TDY,Teledyne Technologies,Information Technology,2026-09-06,screened
+TECH,Bio-Techne,Health Care,2026-09-06,screened
+TEL,TE Connectivity,Information Technology,2026-09-06,screened
+TER,Teradyne,Information Technology,2026-09-06,screened
+TFC,Truist Financial,Financials,2026-09-06,screened
+TGT,Target Corporation,Consumer Staples,2026-09-06,screened
+TJX,TJX Companies,Consumer Discretionary,2026-09-06,screened
+TKO,TKO Group Holdings,Communication Services,2026-09-06,screened
+TMO,Thermo Fisher Scientific,Health Care,2026-09-06,screened
+TMUS,T-Mobile US,Communication Services,2026-09-06,screened
+TPL,Texas Pacific Land Corporation,Energy,2026-09-06,screened
+TPR,"Tapestry, Inc.",Consumer Discretionary,2026-09-06,screened
+TRGP,Targa Resources,Energy,2026-09-06,screened
+TRMB,Trimble Inc.,Information Technology,2026-09-06,screened
+TROW,T. Rowe Price,Financials,2026-09-06,screened
+TRV,Travelers Companies (The),Financials,2026-09-06,screened
+TSCO,Tractor Supply,Consumer Discretionary,2026-09-06,screened
+TSLA,"Tesla, Inc.",Consumer Discretionary,2026-09-06,screened
+TSN,Tyson Foods,Consumer Staples,2026-09-06,screened
+TT,Trane Technologies,Industrials,2026-09-06,screened
+TTD,Trade Desk (The),Communication Services,2026-09-06,screened
+TTWO,Take-Two Interactive,Communication Services,2026-09-06,screened
+TXN,Texas Instruments,Information Technology,2026-09-06,screened
+TXT,Textron,Industrials,2026-09-06,screened
+TYL,Tyler Technologies,Information Technology,2026-09-06,screened
+UAL,United Airlines Holdings,Industrials,2026-09-06,screened
+UBER,Uber,Industrials,2026-09-06,screened
+UDR,"UDR, Inc.",Real Estate,2026-09-06,screened
+UHS,Universal Health Services,Health Care,2026-09-06,screened
+ULTA,Ulta Beauty,Consumer Discretionary,2026-09-06,screened
+UNH,UnitedHealth Group,Health Care,2026-09-06,screened
+UNP,Union Pacific Corporation,Industrials,2026-09-06,screened
+UPS,United Parcel Service,Industrials,2026-09-06,screened
+URI,United Rentals,Industrials,2026-09-06,screened
+USB,U.S. Bancorp,Financials,2026-09-06,screened
+V,Visa Inc.,Financials,2026-09-06,screened
+VEEV,Veeva Systems,Health Care,2026-09-06,screened
+VICI,Vici Properties,Real Estate,2026-09-06,screened
+VLO,Valero Energy,Energy,2026-09-06,screened
+VLTO,Veralto,Industrials,2026-09-06,screened
+VMC,Vulcan Materials Company,Materials,2026-09-06,screened
+VMRK,Vivmark Residential,Real Estate,2026-09-06,screened
+VRSK,Verisk Analytics,Industrials,2026-09-06,screened
+VRSN,Verisign,Information Technology,2026-09-06,screened
+VRT,Vertiv,Industrials,2026-09-06,screened
+VRTX,Vertex Pharmaceuticals,Health Care,2026-09-06,screened
+VST,Vistra Corp.,Utilities,2026-09-06,screened
+VTR,Ventas,Real Estate,2026-09-06,screened
+VTRS,Viatris,Health Care,2026-09-06,screened
+VZ,Verizon,Communication Services,2026-09-06,screened
+WAB,Wabtec,Industrials,2026-09-06,screened
+WAT,Waters Corporation,Health Care,2026-09-06,screened
+WBD,Warner Bros. Discovery,Communication Services,2026-09-06,screened
+WDAY,"Workday, Inc.",Information Technology,2026-09-06,screened
+WDC,Western Digital,Information Technology,2026-09-06,screened
+WEC,WEC Energy Group,Utilities,2026-09-06,screened
+WELL,Welltower,Real Estate,2026-09-06,screened
+WFC,Wells Fargo,Financials,2026-09-06,screened
+WM,Waste Management,Industrials,2026-09-06,screened
+WMB,Williams Companies,Energy,2026-09-06,screened
+WMT,Walmart,Consumer Staples,2026-09-06,screened
+WRB,W. R. Berkley Corporation,Financials,2026-09-06,screened
+WSM,"Williams-Sonoma, Inc.",Consumer Discretionary,2026-09-06,screened
+WST,West Pharmaceutical Services,Health Care,2026-09-06,screened
+WTW,Willis Towers Watson,Financials,2026-09-06,screened
+WY,Weyerhaeuser,Real Estate,2026-09-06,screened
+WYNN,Wynn Resorts,Consumer Discretionary,2026-09-06,screened
+XEL,Xcel Energy,Utilities,2026-09-06,screened
+XOM,ExxonMobil,Energy,2026-09-06,screened
+XYL,Xylem Inc.,Industrials,2026-09-06,screened
+XYZ,"Block, Inc.",Financials,2026-09-06,screened
+YUM,Yum! Brands,Consumer Discretionary,2026-09-06,screened
+ZBH,Zimmer Biomet,Health Care,2026-09-06,screened
+ZBRA,Zebra Technologies,Information Technology,2026-09-06,screened
+ZTS,Zoetis,Health Care,2026-09-06,screened
