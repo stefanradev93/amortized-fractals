@@ -530,6 +530,7 @@ def plot_model_allocation_backtest(
     selected_fee: float = 5.0,
     assets: Sequence[str] = ASSET_NAMES,
     initial_wealth: float = 256.0,
+    figsize: tuple = (12, 8.5)
 ) -> plt.Figure:
     """Plot net wealth by fee plus model weights and cumulative turnover."""
 
@@ -549,7 +550,7 @@ def plot_model_allocation_backtest(
         "VOO (100%, buy & hold)": ":",
     }
 
-    fig = plt.figure(figsize=(18, 10.5))
+    fig = plt.figure(figsize=figsize)
     grid = fig.add_gridspec(2, 3, height_ratios=(1.08, 0.92), hspace=0.34, wspace=0.24)
     top_axes = [fig.add_subplot(grid[0, 0])]
     top_axes.extend(fig.add_subplot(grid[0, column], sharey=top_axes[0]) for column in range(1, 3))

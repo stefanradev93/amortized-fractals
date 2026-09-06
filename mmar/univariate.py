@@ -101,14 +101,8 @@ def simulate(n, seed=None, prior=PRIOR):
 
 
 def conditions(returns):
-    """Normalize observed paths without losing their location or scale."""
-    x = np.asarray(returns, dtype="float64")
-    center = np.median(x, axis=1)
-    scale = np.maximum(np.median(np.abs(x - center[:, None]), axis=1) / 0.67448975, 1e-6)
-    return {
-        "series": ((x - center[:, None]) / scale[:, None])[..., None].astype("float32"),
-        "context": np.column_stack((center / scale, np.log(scale / 0.015))).astype("float32"),
-    }
+    """Pass raw decimal returns as a single-channel time series."""
+    return {"series": np.asarray(returns, dtype="float32")[..., None]}
 
 
 def training_data(n, seed=None, prior=PRIOR):

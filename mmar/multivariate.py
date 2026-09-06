@@ -1,8 +1,8 @@
 """Static multivariate MMAR simulation, posterior prediction, and risk helpers.
 
-The model combines asset-specific binomial cascade intensities with a shared
-cascade orientation tree and variance-standardized multivariate Student-t
-innovations.  It is deliberately independent of the univariate training code.
+The model uses the univariate prior ranges and 32-day block resolution, with a
+shared cascade orientation tree, a shared circular shift, and standardized
+multivariate Student-t innovations.
 """
 
 from __future__ import annotations
@@ -12,6 +12,7 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 
+from .univariate import CASCADE_BLOCK, WINDOW, PRIOR as UNIVARIATE_PRIOR
 
 ASSET_NAMES = ("VOO", "GLD", "TLT")
 ASSET_LABELS = {
@@ -33,27 +34,21 @@ class MultivariateMMARPrior:
     """Hyperparameters for a static, three-asset multivariate MMAR prior."""
 
     assets: tuple[str, ...] = ASSET_NAMES
-    mu_loc: tuple[float, ...] = (0.0, 0.0, 0.0)
-    mu_scale: tuple[float, ...] = (0.00075, 0.00070, 0.00055)
-    sigma_bar_low: tuple[float, ...] = (0.006, 0.006, 0.004)
-    sigma_bar_high: tuple[float, ...] = (0.022, 0.021, 0.018)
-    q_low: tuple[float, ...] = (0.51, 0.51, 0.51)
-    q_high: tuple[float, ...] = (0.70, 0.69, 0.68)
-    nu_offset: float = 2.0
-    nu_gamma_shape: float = 8.0
-    nu_gamma_scale: float = 0.8
+    mu_loc: tuple[float, ...] = (UNIVARIATE_PRIOR.mu_loc,) * 3
+    mu_scale: tuple[float, ...] = (UNIVARIATE_PRIOR.mu_sd,) * 3
+    sigma_bar_low: tuple[float, ...] = (UNIVARIATE_PRIOR.sigma_low,) * 3
+    sigma_bar_high: tuple[float, ...] = (UNIVARIATE_PRIOR.sigma_high,) * 3
+    q_low: tuple[float, ...] = (UNIVARIATE_PRIOR.q_low,) * 3
+    q_high: tuple[float, ...] = (UNIVARIATE_PRIOR.q_high,) * 3
+    nu_low: float = UNIVARIATE_PRIOR.nu_low
+    nu_high: float = UNIVARIATE_PRIOR.nu_high
     correlation_df: int = 7
 
     @property
     def dimension(self) -> int:
         return len(self.assets)
 
-    @property
-    def nu_mode(self) -> float:
-        return self.nu_offset + (self.nu_gamma_shape - 1.0) * self.nu_gamma_scale
 
-
-WINDOW = 256
 PRIOR = MultivariateMMARPrior()
 
 
@@ -152,10 +147,8 @@ def draw_multivariate_prior(
     mu = rng.normal(mu_loc, mu_scale, size=(num_draws, prior.dimension))
     sigma_bar = rng.uniform(sigma_low, sigma_high, size=(num_draws, prior.dimension))
     q = rng.uniform(q_low, q_high, size=(num_draws, prior.dimension))
-    nu = prior.nu_offset + rng.gamma(
-        prior.nu_gamma_shape,
-        prior.nu_gamma_scale,
-        size=(num_draws, 1),
+    nu = 2 + np.exp(
+        rng.uniform(np.log(prior.nu_low - 2), np.log(prior.nu_high - 2), size=(num_draws, 1))
     )
     correlation = draw_correlation_matrices(
         num_draws,
@@ -183,7 +176,7 @@ def shared_orientation_cascade_weights(
     num_observations: int,
     rng: np.random.Generator,
 ) -> np.ndarray:
-    """Draw asset-specific cascade weights on one shared random orientation tree."""
+    """Shared tree and phase; asset-specific intensities on 32-day blocks."""
 
     q = np.asarray(q, dtype=np.float64)
     num_draws, num_assets = q.shape
@@ -191,7 +184,7 @@ def shared_orientation_cascade_weights(
     high = 2.0 * q[:, None, :]
     low = 2.0 * (1.0 - q[:, None, :])
 
-    for _ in range(int(np.log2(num_observations))):
+    for _ in range(int(np.log2(num_observations // CASCADE_BLOCK))):
         # A common orientation synchronizes volatility regimes without forcing
         # each asset to have the same cascade strength q.
         high_on_left = rng.random((num_draws, weights.shape[1], 1)) < 0.5
@@ -199,7 +192,10 @@ def shared_orientation_cascade_weights(
         right = weights * np.where(high_on_left, low, high)
         weights = np.stack((left, right), axis=2).reshape(num_draws, -1, num_assets)
     weights /= weights.mean(axis=1, keepdims=True)
-    return weights
+    weights = np.repeat(weights, CASCADE_BLOCK, axis=1)
+    offsets = rng.integers(0, num_observations, size=(num_draws, 1, 1))
+    indices = (np.arange(num_observations)[None, :, None] + offsets) % num_observations
+    return np.take_along_axis(weights, indices, axis=1)
 
 
 def standardized_multivariate_t(
@@ -304,7 +300,7 @@ def prior_table(prior=PRIOR):
         [
             (
                 "nu (shared)",
-                f"{prior.nu_offset:g} + Gamma(shape={prior.nu_gamma_shape:g}, scale={prior.nu_gamma_scale:g}); mode={prior.nu_mode:g}",
+                f"2 + exp(Uniform(log({prior.nu_low - 2:.4g}), log({prior.nu_high - 2:g})))",
             ),
             (
                 "correlation",

@@ -33,8 +33,10 @@ All four parameters are fixed within a window. The shocks have unit variance bef
 
 ### Three assets, one joint model
 
-VOO, GLD and TLT each get their own drift, scale and cascade strength. They share the
-cascade orientation tree and one tail parameter $\nu$. A **3 × 3 correlation matrix $R$**
+VOO, GLD and TLT each get their own drift, scale and cascade strength, with the same
+prior ranges as the univariate model. Both workflows use eight 32-day cascade blocks.
+The joint model shares split orientations, a random circular shift and one tail parameter $\nu$.
+A **3 × 3 correlation matrix $R$**
 describes how their innovation shocks move together: ones on the diagonal, pairwise
 correlations off the diagonal.
 
