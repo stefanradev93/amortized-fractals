@@ -1,5 +1,4 @@
 # Local training artifacts and Python/Jupyter caches
-checkpoints/
 __pycache__/
 *.py[cod]
 .ipynb_checkpoints/

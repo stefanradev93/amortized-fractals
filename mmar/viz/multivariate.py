@@ -203,6 +203,7 @@ def plot_dependence_pushforwards(
     assets: Sequence[str] = ASSET_NAMES,
     predictive_label: str = "Prior",
     figure_title: str = "Cross-Asset Dependence Pushforwards",
+    ylims: tuple[float, float] | None = None,
 ) -> plt.Figure:
     """Compare raw and absolute-return correlation across all asset pairs."""
 
@@ -236,6 +237,10 @@ def plot_dependence_pushforwards(
             ax.set_xlabel("Correlation", fontsize=12)
             ax.set_yticks([])
             ax.tick_params(labelsize=11)
+
+            if ylims is not None:
+                ax.set_ylim(ylims)
+
             if row == 0 and column == 0:
                 ax.plot(
                     [],
@@ -247,6 +252,7 @@ def plot_dependence_pushforwards(
                 )
                 ax.plot([], [], color=OBSERVED_COLOR, linewidth=3, label="Observed")
                 ax.legend(frameon=False, fontsize=10)
+
     fig.suptitle(figure_title, fontsize=19, y=1.01)
     fig.tight_layout()
     return fig
@@ -634,7 +640,6 @@ def plot_model_allocation_backtest(
     fig.suptitle(
         "Walk-Forward MMAR Allocation vs. Buy-and-Hold Benchmarks",
         fontsize=20,
-        y=0.99,
     )
     fig.subplots_adjust(top=0.93, bottom=0.08)
     return fig
