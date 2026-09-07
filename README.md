@@ -1,6 +1,6 @@
 # Amortized fractals: fractal volatility and heavy-tailed returns
 
-This demonstrates an end-to-end amortized Bayesian workflow for **Multifractal Models of Asset Returns (MMAR)**.
+This repository demonstrates an end-to-end amortized Bayesian workflow for **Multifractal Models of Asset Returns (MMAR)**.
 We will train neural posterior estimators on simulated markets, then reuse them across rolling $T$-day windows to estimate parameters, simulate wealth paths, and quantify downside risk from real market returns.
 
 - [Univariate MMAR (SPMO / VOO)](mmar_univariate.ipynb)
@@ -11,7 +11,7 @@ We will train neural posterior estimators on simulated markets, then reuse them 
 
 ## From a cascade to market returns
 
-A binomial fractial cascade splits intervals in half, then randomly assigns fractions $q$ and $1-q$ of its trading-time mass to the children: their **relative intensities** multiply by $2q$ and $2(1-q)$. Repeating this process creates clusters of quiet and turbulent days while preserving a mean intensity of one. The final weights are randomly shifted to avoid artifically placing cascade boundaries at the same positions in a $T$-day window.
+A binomial fractial cascade splits intervals in half, then randomly assigns fractions $q$ and $1-q$ of its trading-time mass to the children: their **relative intensities** multiply by $2q$ and $2(1-q)$. Repeating this process creates clusters of quiet and turbulent days. The final weights are randomly shifted to avoid artifically placing cascade boundaries at the same positions in a $T$-day window.
 
 ![A binomial cascade splits into eight 32-day volatility blocks, then receives a random circular shift.](gifs/fractal_cascade.gif)
 
@@ -30,20 +30,18 @@ $$
 | $q$ | Cascade contrast and volatility clustering |
 | $\nu>2$ | Innovation tail thickness |
 
-All four parameters are fixed within a window. The shocks have unit variance before truncation; the random cascade makes returns **non-IID**.
+All four parameters are stationary within a window. The shocks have unit variance before truncation; the random cascade makes returns **non-IID**.
 
 ### Three assets, one joint model
 
-VOO, GLD and TLT each get their own drift, scale and cascade strength, with the same
-prior ranges as the univariate model. Both workflows use eight 32-day cascade blocks.
-The joint model shares split orientations, a random circular shift and one tail parameter $\nu$.
-A **3 × 3 correlation matrix $R$**
-describes how their innovation shocks move together: ones on the diagonal, pairwise
-correlations off the diagonal.
+VOO, GLD and TLT each get their own drift, scale and cascade strength, with the same prior ranges as the univariate model. Both workflows use eight 32-day cascade blocks.
+
+The joint model shares split orientations, a random circular shift and one tail parameter $\nu$. A **3 × 3 correlation matrix $R$**
+describes how their innovation shocks move together: ones on the diagonal, pairwise correlations off the diagonal.
 
 $$
 \mathbf r_t=\boldsymbol\mu+D_t\boldsymbol z_t,
-\qquad D_t=\operatorname{diag}\!\left(\bar\sigma_i\sqrt{\theta_{i,t}}\right),
+\qquad D_t=\mathrm{diag}\!\left(\bar\sigma_i\sqrt{\theta_{i,t}}\right),
 \qquad \boldsymbol z_t\sim t_\nu\!\left(\mathbf 0,\frac{\nu-2}{\nu}R\right).
 $$
 
