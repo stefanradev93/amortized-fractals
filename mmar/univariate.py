@@ -38,7 +38,7 @@ def prior_table(prior=PRIOR):
             ],
             "meaning": [
                 "Daily drift",
-                "RMS scale before path rejection",
+                "Stationary scale",
                 "Cascade asymmetry",
                 "Student-t degrees of freedom",
             ],

@@ -70,7 +70,7 @@ def plot_recovery(samples, targets, labels, grid=(2, 2), interval=0.68):
     return fig
 
 
-def plot_calibration(samples, targets, labels, grid=(2, 2), alpha=0.1):
+def plot_calibration(samples, targets, labels, grid=(2, 2), alpha=0.15):
     """SBC rank ECDF differences with a visible simultaneous reference band."""
     import bayesflow as bf
 

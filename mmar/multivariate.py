@@ -263,11 +263,6 @@ def simulate(n, seed=None, prior=PRIOR):
     }
 
 
-def training_data(n, seed=None, prior=PRIOR):
-    data = simulate(n, seed, prior)
-    return {name: data[name] for name in (*INFERENCE_VARIABLES, "returns")}
-
-
 def forward_paths(parameters, horizon, rng):
     """Start a fresh 256-day cascade, then take the requested horizon."""
     paths = np.empty((len(parameters), horizon, 3), dtype="float32")

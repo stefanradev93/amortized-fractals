@@ -6,6 +6,7 @@ We will train neural posterior estimators on simulated markets, then reuse them 
 - [Univariate MMAR (SPMO / VOO)](mmar_univariate.ipynb)
 - [Multivariate MMAR (VOO / GLD / TLT)](mmar_multivariate.ipynb)
 - [Model-based stock screener](mmar_stock_screener.ipynb)
+- [Volatility-cluster sensitivity (VOO / SPMO)](mmar_sensitivity.ipynb)
 
 ## From a cascade to market returns
 
@@ -89,7 +90,7 @@ python -m pip install -e .
 KERAS_BACKEND=torch jupyter lab
 ```
 
-The two workflow notebooks define their workflows explicitly. **Run All trains** in those notebooks; stop before *Amortized inference* for prior checks only. The screener only loads a saved model. Market returns are cached in `data/`, and all figures are saved in `figures/`. Models and plotting/risk helpers live in [`mmar/`](mmar/).
+The three workflow notebooks define their workflows explicitly. **Run All trains** in those notebooks; stop before *Amortized inference* for prior checks only. The screener only loads a saved model. Market returns are cached in `data/`, and all figures are saved in `figures/`. Models and plotting/risk helpers live in [`mmar/`](mmar/).
 
 Regenerate the animation with `python -m mmar.viz.cascade`.
 
