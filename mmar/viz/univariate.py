@@ -3,6 +3,9 @@ from typing import Mapping, Sequence
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.patches import Patch
+from scipy.ndimage import gaussian_filter1d
+from scipy import stats as scipy_stats
 from ..statistics import max_drawdown_batch
 from . import (
     PREDICTION_PURPLE,
@@ -345,6 +348,290 @@ def plot_posterior_predictive_checks(
 
     fig.suptitle("Posterior Predictive Checks on the Latest 256-Day Window", fontsize=22)
     fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.96))
+    return fig
+
+
+def _magnitude_density(values: np.ndarray, bins: np.ndarray) -> np.ndarray:
+    """Histogram density of finite, nonzero magnitudes."""
+
+    magnitudes = np.abs(np.asarray(values, dtype="float64").reshape(-1))
+    magnitudes = magnitudes[np.isfinite(magnitudes) & (magnitudes > 0.0)]
+    if not len(magnitudes):
+        raise ValueError("At least one nonzero return is required.")
+    counts = np.histogram(magnitudes, bins=bins)[0]
+    return counts / (len(magnitudes) * np.diff(bins))
+
+
+def _pointwise_hdi(draws: np.ndarray, probability: float) -> tuple[np.ndarray, np.ndarray]:
+    """Narrowest sample interval at each plotted density bin."""
+
+    values = np.asarray(draws, dtype="float64")
+    if values.ndim != 2 or not 0.0 < probability < 1.0:
+        raise ValueError("Expected 2D draws and a probability strictly between zero and one.")
+    interval = max(1, min(len(values) - 1, int(np.floor(probability * len(values)))))
+    ordered = np.sort(values, axis=0)
+    widths = ordered[interval:] - ordered[:-interval]
+    starts = np.argmin(widths, axis=0)
+    columns = np.arange(values.shape[1])
+    return ordered[starts, columns], ordered[starts + interval, columns]
+
+
+def _smooth_density_draws(
+    densities: np.ndarray,
+    bins: np.ndarray,
+    sigma: float,
+) -> np.ndarray:
+    """Smooth probability mass on an equally spaced log-bin grid."""
+
+    values = np.asarray(densities, dtype="float64")
+    if sigma == 0.0:
+        return values
+    bin_widths = np.diff(bins)
+    masses = values * bin_widths
+    smoothed_masses = gaussian_filter1d(
+        masses,
+        sigma=sigma,
+        axis=1,
+        mode="constant",
+        cval=0.0,
+    )
+    original_mass = masses.sum(axis=1, keepdims=True)
+    smoothed_mass = smoothed_masses.sum(axis=1, keepdims=True)
+    smoothed_masses *= np.divide(
+        original_mass,
+        smoothed_mass,
+        out=np.ones_like(original_mass),
+        where=smoothed_mass > 0.0,
+    )
+    return smoothed_masses / bin_widths
+
+
+def plot_gaussian_mmar_fit_comparison(
+    observed_returns: pd.Series | np.ndarray,
+    posterior_paths: np.ndarray,
+    ticker: str = "VOO",
+    n_bins: int = 50,
+    x_label_fontsize: float = 19,
+    y_label_fontsize: float = 19,
+    legend_fontsize: float | None = None,
+    uncertainty_style: str = "hdi",
+    uncertainty_sd: float = 2.0,
+    uncertainty_probability: float = 0.68,
+    density_smoothing: float = 1.5,
+    density_clip: float = 1e-3,
+    minimum_magnitude: float = 1e-3,
+) -> plt.Figure:
+    """Compare absolute returns with folded-Gaussian and MMAR predictive densities."""
+
+    date_label = None
+    if isinstance(observed_returns, pd.Series) and isinstance(
+        observed_returns.index, pd.DatetimeIndex
+    ):
+        date_label = (
+            f"{observed_returns.index.min():%b %d, %Y}–"
+            f"{observed_returns.index.max():%b %d, %Y}"
+        )
+
+    observed = np.asarray(observed_returns).reshape(-1)
+    observed = observed[np.isfinite(observed)]
+    predictive = np.asarray(posterior_paths, dtype="float64")
+    if predictive.ndim != 2:
+        raise ValueError("Expected posterior_paths with shape (draw, time).")
+    predictive = predictive[np.isfinite(predictive)]
+    if np.any(observed <= -1.0) or np.any(predictive <= -1.0):
+        raise ValueError("Simple returns must be greater than -1 before taking log1p.")
+
+    observed_log = np.log1p(observed)
+    predictive_log = np.log1p(predictive)
+    observed_magnitude = np.abs(observed_log)
+    observed_magnitude = observed_magnitude[observed_magnitude > 0.0]
+    predictive_magnitude = np.abs(predictive_log)
+    predictive_magnitude = predictive_magnitude[predictive_magnitude > 0.0]
+    if len(observed_magnitude) < 2 or len(predictive_magnitude) < 2:
+        raise ValueError("Observed and posterior-predictive samples need nonzero returns.")
+    if uncertainty_style not in {"band", "curves", "hdi", "hdi_band"}:
+        raise ValueError(
+            "uncertainty_style must be 'band', 'curves', 'hdi', or 'hdi_band'."
+        )
+    if (
+        uncertainty_sd <= 0.0
+        or density_smoothing < 0.0
+        or density_clip <= 0.0
+        or minimum_magnitude <= 0.0
+    ):
+        raise ValueError(
+            "uncertainty_sd and density_clip must be positive; "
+            "density_smoothing must be nonnegative; minimum_magnitude must be positive."
+        )
+    if not 0.0 < uncertainty_probability < 1.0:
+        raise ValueError("uncertainty_probability must be strictly between zero and one.")
+
+    lower = max(
+        float(np.quantile(observed_magnitude, 0.005)),
+        minimum_magnitude,
+    )
+    upper = 1.05 * float(observed_magnitude.max())
+    if not lower < upper:
+        raise ValueError("Absolute returns do not span a usable plotting range.")
+
+    bins = np.geomspace(lower, upper, n_bins + 1)
+    centers = np.sqrt(bins[:-1] * bins[1:])
+    observed_density = _magnitude_density(observed_log, bins)
+    realization_densities = np.stack(
+        [_magnitude_density(np.log1p(path), bins) for path in posterior_paths]
+    )
+    realization_densities = _smooth_density_draws(
+        realization_densities,
+        bins,
+        density_smoothing,
+    )
+    predictive_mean_density = realization_densities.mean(axis=0)
+    predictive_std_density = realization_densities.std(axis=0, ddof=1)
+    if uncertainty_style in {"hdi", "hdi_band"}:
+        predictive_lower_density, predictive_upper_density = _pointwise_hdi(
+            realization_densities,
+            uncertainty_probability,
+        )
+        uncertainty_label = f"{100 * uncertainty_probability:g}% HDI"
+    else:
+        predictive_lower_density = (
+            predictive_mean_density - uncertainty_sd * predictive_std_density
+        )
+        predictive_upper_density = (
+            predictive_mean_density + uncertainty_sd * predictive_std_density
+        )
+        uncertainty_label = rf"$\pm$ {uncertainty_sd:g} SD"
+
+    normal_loc, normal_scale = scipy_stats.norm.fit(observed_log)
+    x_grid = np.geomspace(lower, upper, 500)
+    normal_density = scipy_stats.norm.pdf(x_grid, normal_loc, normal_scale)
+    normal_density += scipy_stats.norm.pdf(-x_grid, normal_loc, normal_scale)
+    occupied_bins = observed_density > 0.0
+    gaussian_99 = scipy_stats.foldnorm.ppf(
+        0.99,
+        abs(normal_loc) / normal_scale,
+        scale=normal_scale,
+    )
+    gaussian_bin_probability = (
+        scipy_stats.norm.cdf(bins[1:], normal_loc, normal_scale)
+        - scipy_stats.norm.cdf(bins[:-1], normal_loc, normal_scale)
+        + scipy_stats.norm.cdf(-bins[:-1], normal_loc, normal_scale)
+        - scipy_stats.norm.cdf(-bins[1:], normal_loc, normal_scale)
+    )
+    gaussian_expected_count = len(observed_log) * gaussian_bin_probability
+    missed_bins = occupied_bins & (centers > gaussian_99) & (gaussian_expected_count < 0.5)
+    regular_bins = occupied_bins & ~missed_bins
+
+    fig, axes = plt.subplots(1, 2, figsize=(16, 5.8), sharex=True, sharey=True)
+    model_specs = (
+        ("Gaussian fit", x_grid, normal_density, "Gaussian MLE", "#285C4D"),
+        (
+            "Univariate MMAR fit",
+            centers,
+            predictive_mean_density,
+            f"MMAR mean; {uncertainty_label}",
+            PREDICTION_PURPLE_DARK,
+        ),
+    )
+    model_lines = []
+    display_floor = 0.25 * observed_density[observed_density > 0.0].min()
+    for panel, (ax, (title, model_x, model_density, model_label, model_color)) in enumerate(
+        zip(axes, model_specs)
+    ):
+        regular_bars = ax.bar(
+            bins[:-1][regular_bins],
+            observed_density[regular_bins],
+            width=np.diff(bins)[regular_bins],
+            align="edge",
+            color="#C9CDD4",
+            edgecolor="#737A86",
+            linewidth=0.55,
+            alpha=0.82,
+            label=f"{ticker} observed",
+            zorder=1,
+        )
+        missed_bars = ax.bar(
+            bins[:-1][missed_bins],
+            observed_density[missed_bins],
+            width=np.diff(bins)[missed_bins],
+            align="edge",
+            color="#D1495B",
+            edgecolor="#8E2433",
+            linewidth=0.75,
+            alpha=0.88,
+            label="Beyond Gaussian 99% range",
+            zorder=2,
+        )
+        if panel == 1 and uncertainty_style in {"band", "hdi_band"}:
+            ax.fill_between(
+                centers,
+                np.maximum(predictive_lower_density, density_clip),
+                predictive_upper_density,
+                where=predictive_upper_density > density_clip,
+                color=PREDICTION_PURPLE,
+                alpha=0.24,
+                linewidth=0.0,
+                zorder=2.5,
+            )
+        elif panel == 1:
+            for density in (predictive_lower_density, predictive_upper_density):
+                ax.plot(
+                    centers,
+                    np.where(density > density_clip, density, np.nan),
+                    color=PREDICTION_PURPLE,
+                    linewidth=2.0,
+                    linestyle="--",
+                    alpha=0.82,
+                    zorder=2.5,
+                )
+        model_line, = ax.plot(
+            model_x,
+            np.where(model_density > density_clip, model_density, np.nan),
+            color=model_color,
+            linewidth=3.0,
+            label=model_label,
+            zorder=3,
+        )
+        model_lines.append(model_line)
+        ax.set_xscale("log")
+        ax.set_yscale("log")
+        ax.set_title(title, fontsize=17)
+        ax.set_xlabel(
+            r"Absolute daily log-return",
+            fontsize=x_label_fontsize,
+        )
+        ax.grid(True, which="major", alpha=0.18)
+        ax.grid(False, which="minor")
+
+    axes[0].set_ylim(
+        display_floor,
+        1.8 * max(
+            observed_density.max(),
+            normal_density.max(),
+            predictive_mean_density.max(),
+            predictive_upper_density.max(),
+        ),
+    )
+    axes[0].set_ylabel("Probability density", fontsize=y_label_fontsize)
+    window_label = date_label or f"{len(observed_log):,} trading days"
+    fig.suptitle(
+        f"Absolute {ticker} Returns: Gaussian vs. MMAR ({window_label})",
+        fontsize=20,
+        y=0.96,
+    )
+    observed_handle = Patch(facecolor="#C9CDD4", edgecolor="#737A86")
+    if legend_fontsize is None:
+        legend_fontsize = max(x_label_fontsize, y_label_fontsize)
+    fig.legend(
+        [model_lines[0], model_lines[1], observed_handle],
+        ["Gaussian MLE", model_specs[1][3], f"{ticker} observed; Gaussian misses red"],
+        loc="lower center",
+        bbox_to_anchor=(0.5, -0.015),
+        ncol=3,
+        frameon=False,
+        fontsize=legend_fontsize,
+    )
+    fig.tight_layout(rect=(0.0, 0.11, 1.0, 1.0))
     return fig
 
 

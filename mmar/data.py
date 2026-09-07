@@ -7,7 +7,7 @@ import pandas as pd
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 
 
-def load_market_returns(tickers, start="2020-01-01", end="2026-09-01"):
+def load_market_returns(tickers, start="2020-01-01", end="2026-09-04"):
     cache = DATA_DIR / f"{'_'.join(tickers)}_{start}_{end}.csv"
     if cache.exists():
         returns = pd.read_csv(cache, index_col=0, parse_dates=True)

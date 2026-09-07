@@ -4,9 +4,10 @@ This demonstrates an end-to-end amortized Bayesian workflow for **Multifractal M
 We will train neural posterior estimators on simulated markets, then reuse them across rolling $T$-day windows to estimate parameters, simulate wealth paths, and quantify downside risk from real market returns.
 
 - [Univariate MMAR (SPMO / VOO)](mmar_univariate.ipynb)
-- [Multivariate MMAR (VOO / GLD / TLT)](mmar_multivariate.ipynb)
-- [Model-based stock screener](mmar_stock_screener.ipynb)
 - [Volatility-cluster sensitivity (VOO / SPMO)](mmar_sensitivity.ipynb)
+- [Model-based stock screener](mmar_stock_screener.ipynb)
+- [Multivariate MMAR (VOO / GLD / TLT)](mmar_multivariate.ipynb)
+- [Multivariate MMAR (VOO / GLD / TLT) with innovation memory](mmat_hurst.ipynb)
 
 ## From a cascade to market returns
 
@@ -87,12 +88,10 @@ Python **3.12–3.13**, from the repository root. Use a fresh environment to lea
 python -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .
-KERAS_BACKEND=torch jupyter lab
+KERAS_BACKEND=jax
 ```
 
 The three workflow notebooks define their workflows explicitly. **Run All trains** in those notebooks; stop before *Amortized inference* for prior checks only. The screener only loads a saved model. Market returns are cached in `data/`, and all figures are saved in `figures/`. Models and plotting/risk helpers live in [`mmar/`](mmar/).
-
-Regenerate the animation with `python -m mmar.viz.cascade`.
 
 ### Stock screener
 
