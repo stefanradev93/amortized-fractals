@@ -11,6 +11,29 @@ CACHE = Path(__file__).resolve().parents[2] / "data" / "screener"
 UNIVERSE_URL = (
     "https://raw.githubusercontent.com/datasets/s-and-p-500-companies/main/data/constituents.csv"
 )
+YAHOO_HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.5",
+}
+
+
+def _yahoo_session():
+    """Return a yfinance-compatible session without curl TLS impersonation.
+
+    yfinance's default curl_cffi transport can raise ``ImpersonateError`` when
+    its Python package and native library get out of sync (especially in a
+    long-running notebook kernel).  yfinance supports a regular requests
+    session, which avoids that failure mode.
+    """
+    import requests
+
+    session = requests.Session()
+    session.headers.update(YAHOO_HEADERS)
+    return session
 
 
 def load_universe(snapshot=None, cache_dir=CACHE):
@@ -55,21 +78,35 @@ def load_prices(members, as_of, cache_dir=CACHE):
         prices = pd.read_csv(cache, index_col=0, parse_dates=True)
     else:
         chunks = []
-        for start in range(0, len(tickers), 50):
-            batch = tickers[start : start + 50]
-            downloaded = yf.download(
-                batch,
-                start=str((as_of - pd.Timedelta(days=730)).date()),
-                end=str((as_of + pd.Timedelta(days=1)).date()),
-                auto_adjust=True,
-                progress=False,
-                threads=4,
-            )
-            if not downloaded.empty:
-                chunks.append(downloaded["Close"].reindex(columns=batch))
-            print(f"Prices: {min(start + 50, len(tickers))}/{len(tickers)} symbols", flush=True)
+        start_date = str((as_of - pd.Timedelta(days=730)).date())
+        end_date = str((as_of + pd.Timedelta(days=1)).date())
+        with _yahoo_session() as session:
+            for offset in range(0, len(tickers), 50):
+                batch = tickers[offset : offset + 50]
+                downloaded = yf.download(
+                    batch,
+                    start=start_date,
+                    end=end_date,
+                    auto_adjust=True,
+                    progress=False,
+                    threads=4,
+                    timeout=20,
+                    session=session,
+                )
+                if not downloaded.empty:
+                    close = downloaded["Close"].reindex(columns=batch)
+                    if not close.dropna(how="all").empty:
+                        chunks.append(close)
+                print(
+                    f"Prices: {min(offset + 50, len(tickers))}/{len(tickers)} symbols",
+                    flush=True,
+                )
         if not chunks:
-            raise RuntimeError("No prices downloaded. Check network access and retry.")
+            raise RuntimeError(
+                "No prices downloaded from Yahoo Finance. Check network access or "
+                "rate limits and retry; the requests transport was used to avoid "
+                "yfinance curl impersonation errors."
+            )
         prices = pd.concat(chunks, axis=1).sort_index()
         cache.parent.mkdir(parents=True, exist_ok=True)
         prices.to_csv(cache)

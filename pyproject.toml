@@ -18,6 +18,7 @@ dependencies = [
     "umap-learn>=0.5.9,<0.6",
     "matplotlib>=3.11.1",
     "pillow>=10",
+    "requests>=2.32",
     "yfinance>=1",
     "jupyterlab>=4",
 ]
