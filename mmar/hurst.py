@@ -1,4 +1,11 @@
-"""Experimental multivariate MMAR with asset-specific fractional-noise memory."""
+"""Multivariate MMAR with asset-specific fractional-Gaussian driver memory.
+
+Notation used in the model description:
+
+``g`` is the IID standard-Gaussian seed, ``z^(H)`` is the unit-variance
+fractional-Gaussian driver, and ``epsilon`` is the final Student-t innovation
+after applying the shared radial scale.
+"""
 
 from __future__ import annotations
 
@@ -56,7 +63,7 @@ def q_hurst_posterior_draws(posterior):
 
 
 def q_hurst_posterior_summary(posterior, interval_probability=0.92, index_name="ETF"):
-    """Summarize asset-specific cascade strength and signed-return memory."""
+    """Summarize cascade strength and fractional-Gaussian driver memory."""
     if not 0 < interval_probability < 1:
         raise ValueError("interval_probability must lie strictly between zero and one.")
     q, hurst = q_hurst_posterior_draws(posterior)
@@ -128,7 +135,7 @@ def style_q_hurst_posterior_correlations(posterior):
 
 
 def fractional_gaussian_autocovariance(hurst, num_observations=WINDOW):
-    """Return unit-variance fGn autocovariances for lags 0,...,T-1."""
+    """Return the unit-variance ``z^(H)`` autocovariance for lags 0,...,T-1."""
     hurst = np.asarray(hurst)
     lags = np.arange(num_observations)
     exponent = 2 * hurst[..., None]
@@ -146,12 +153,16 @@ def standardized_fractional_multivariate_t(
     num_observations,
     rng,
 ):
-    """Draw heavy-tailed multivariate fractional noise via circulant filtering.
+    """Draw final Student-t innovations from a fractional-Gaussian driver.
 
-    Each marginal has the requested fGn spectrum. ``correlation`` controls
-    frequency-wise Gaussian coherence before the asset-specific filters. A
-    shared independent chi-square scale gives Student-t marginals; at H=0.5
-    this reduces to the baseline standardized multivariate-t innovation.
+    An IID Gaussian seed ``g`` is first mixed across assets according to
+    ``correlation`` and then filtered into the unit-variance driver ``z^(H)``.
+    A shared, independently drawn chi-square radial scale converts each daily
+    Gaussian cross-section into the final innovation ``epsilon`` with
+    Student-t marginals. The requested fGn autocovariance is therefore exact
+    for ``z^(H)``; the radial scales attenuate nonzero-lag linear correlations
+    in ``epsilon``. At H=0.5 this reduces to the baseline standardized
+    multivariate Student-t innovation.
     """
     hurst = np.asarray(hurst, dtype="float64")
     correlation = np.asarray(correlation, dtype="float64")
@@ -172,11 +183,11 @@ def standardized_fractional_multivariate_t(
     eigenvalues = np.maximum(eigenvalues, 0.0)
 
     embedding_size = 2 * num_observations
-    white = rng.normal(size=(n, embedding_size, dimension))
+    gaussian_seed = rng.normal(size=(n, embedding_size, dimension))
     cholesky = np.linalg.cholesky(correlation)
-    coherent_white = np.einsum("bti,bji->btj", white, cholesky)
-    frequencies = np.fft.rfft(coherent_white, axis=1)
-    filtered = np.fft.irfft(
+    correlated_seed = np.einsum("bti,bji->btj", gaussian_seed, cholesky)
+    frequencies = np.fft.rfft(correlated_seed, axis=1)
+    fractional_driver = np.fft.irfft(
         frequencies * np.sqrt(np.moveaxis(eigenvalues, 1, 2)),
         n=embedding_size,
         axis=1,
@@ -184,7 +195,7 @@ def standardized_fractional_multivariate_t(
 
     degrees = np.asarray(nu).reshape(n, 1, 1)
     radial_chi_square = rng.chisquare(df=degrees, size=(n, num_observations, 1))
-    return filtered * np.sqrt((degrees - 2.0) / radial_chi_square)
+    return fractional_driver * np.sqrt((degrees - 2.0) / radial_chi_square)
 
 
 def simulate_from_parameters(parameters, rng, batch_size=512):
@@ -202,12 +213,12 @@ def simulate_from_parameters(parameters, rng, batch_size=512):
         pending = np.arange(len(batch))
         for _ in range(100):
             weights = base.shared_orientation_cascade_weights(q[pending], WINDOW, rng)
-            shocks = standardized_fractional_multivariate_t(
+            innovations = standardized_fractional_multivariate_t(
                 hurst[pending], nu[pending], correlation[pending], WINDOW, rng
             )
             candidates = (
                 mu[pending, None]
-                + sigma[pending, None] * np.sqrt(weights) * shocks
+                + sigma[pending, None] * np.sqrt(weights) * innovations
             )
             invalid = (~np.isfinite(candidates).all(axis=(1, 2))) | (
                 candidates <= -1
@@ -239,11 +250,17 @@ def posterior_resimulations(posterior, seed=None):
 
 
 def prior_table(prior=PRIOR):
-    table = base.prior_table(prior.base)
+    table = base.prior_table(prior.base).copy()
+    table.loc["correlation", "meaning"] = (
+        "Pre-filter Gaussian coherence R; inferred through 3 vine coordinates"
+    )
     additions = pd.DataFrame(
         {
             "prior": [f"Uniform({prior.hurst_low:g}, {prior.hurst_high:g})"]
-            * len(ASSET_NAMES)
+            * len(ASSET_NAMES),
+            "meaning": [
+                f"{asset} fractional-Gaussian driver memory" for asset in ASSET_NAMES
+            ],
         },
         index=[f"H[{asset}]" for asset in ASSET_NAMES],
     )

@@ -69,9 +69,12 @@ def simulate_from_parameters(parameters, d, rng: np.random.Generator):
     for _ in range(100):
         weights[pending] = cascade(q[pending], counts[pending], rng)
         df = nu[pending, None]
-        shocks = rng.standard_t(df, size=(len(pending), WINDOW)) * np.sqrt((df - 2) / df)
+        innovations = rng.standard_t(df, size=(len(pending), WINDOW)) * np.sqrt(
+            (df - 2) / df
+        )
         returns[pending] = (
-            mu[pending, None] + sigma[pending, None] * np.sqrt(weights[pending]) * shocks
+            mu[pending, None]
+            + sigma[pending, None] * np.sqrt(weights[pending]) * innovations
         )
         invalid = (~np.isfinite(returns[pending]).all(1)) | (returns[pending] <= -1).any(1)
         pending = pending[invalid]
@@ -88,7 +91,7 @@ def simulate_from_parameters(parameters, d, rng: np.random.Generator):
         "d": counts[:, None],
         "log_d": np.log(counts)[:, None],
         "returns": returns,
-        "cascade": weights,
+        "trading_time_increments": weights,
     }
 
 

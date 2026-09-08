@@ -195,7 +195,7 @@ def parameter_plot(table, path):
         for ax, name, label, scale in zip(
             axes,
             model.PARAMETER_NAMES,
-            ("Daily drift (%)", "Scale (%)", "Cascade q", "Tail nu"),
+            ("Daily drift (%)", "Scale (%)", "Cascade q", "Student-t df ν"),
             (100, 100, 1, 1),
         ):
             y = np.arange(len(top))

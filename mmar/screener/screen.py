@@ -19,24 +19,6 @@ class Rule:
     tail_alpha: float = 0.05
 
 
-def infer_parameters(approximator, series, num_samples=512, batch_size=32, seed=42):
-    """Infer every stock and retain the summary network's learned embedding."""
-    series = np.asarray(series, dtype="float32")
-    if series.ndim != 3 or series.shape[1:] != (model.WINDOW, 1):
-        raise ValueError("Expected raw decimal returns with shape (stocks, 256, 1).")
-    start = perf_counter()
-    draws = approximator.sample(
-        conditions={"returns": series},
-        num_samples=num_samples,
-        batch_size=batch_size,
-        return_summaries=True,
-        seed=seed,
-    )
-    summaries = np.asarray(draws["_summaries"])
-    parameter_draws = {name: draws[name] for name in model.PARAMETER_NAMES}
-    return model.stack_samples(parameter_draws), summaries, perf_counter() - start
-
-
 def prior_summary_embeddings(approximator, n_simulations=2_000, batch_size=64, seed=44):
     """Map fresh prior-predictive paths through the trained summary network."""
     if n_simulations < 2:

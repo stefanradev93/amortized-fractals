@@ -1,4 +1,4 @@
-"""Univariate MMAR: a randomized block cascade and standardized Student-t shocks."""
+"""Univariate MMAR: a randomized block cascade and Student-t innovations."""
 
 from dataclasses import dataclass
 
@@ -38,9 +38,9 @@ def prior_table(prior=PRIOR):
             ],
             "meaning": [
                 "Daily drift",
-                "Stationary scale",
-                "Cascade asymmetry",
-                "Student-t degrees of freedom",
+                "Baseline RMS return scale",
+                "Cascade contrast and volatility intermittency",
+                "Student-t degrees of freedom and tail thickness",
             ],
         }
     ).set_index("parameter")
@@ -83,9 +83,12 @@ def simulate_from_parameters(parameters, rng):
     for _ in range(100):
         weights[pending] = cascade(q[pending], rng)
         df = nu[pending, None]
-        shocks = rng.standard_t(df, size=(len(pending), WINDOW)) * np.sqrt((df - 2) / df)
+        innovations = rng.standard_t(df, size=(len(pending), WINDOW)) * np.sqrt(
+            (df - 2) / df
+        )
         returns[pending] = (
-            mu[pending, None] + sigma[pending, None] * np.sqrt(weights[pending]) * shocks
+            mu[pending, None]
+            + sigma[pending, None] * np.sqrt(weights[pending]) * innovations
         )
         invalid = (~np.isfinite(returns[pending]).all(1)) | (returns[pending] <= -1).any(1)
         pending = pending[invalid]
@@ -100,7 +103,7 @@ def simulate_from_parameters(parameters, rng):
         "q": q[:, None], 
         "nu": nu[:, None], 
         "returns": returns, 
-        "cascade": weights
+        "trading_time_increments": weights,
     }
 
 

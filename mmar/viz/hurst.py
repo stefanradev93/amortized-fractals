@@ -1,4 +1,4 @@
-"""Animate how the Hurst coefficient changes the model's signed innovations."""
+"""Animate how H changes the model's fractional-Gaussian driver ``z^(H)``."""
 
 from pathlib import Path
 
@@ -12,12 +12,12 @@ from . import OBSERVED_COLOR, PREDICTION_PURPLE, SECONDARY_COLOR
 
 
 def matched_fractional_noise(hurst_values, num_observations=model.WINDOW, seed=20260907):
-    """Filter one fixed Gaussian draw at several H values.
+    """Filter the same IID Gaussian seed ``g`` at several H values.
 
-    Holding the Fourier phases fixed ensures that changes between paths come
-    from H rather than from unrelated Monte Carlo draws. This is the Gaussian
-    Davies--Harte stage of the Hurst MMAR, before its cascade and Student-t
-    radial scale are applied.
+    Holding the full seed fixed ensures that changes between driver paths
+    ``z^(H)`` come from H rather than unrelated Monte Carlo draws. This is the
+    Gaussian Davies--Harte stage of the Hurst MMAR; the cascade and Student-t
+    radial scale are deliberately omitted.
     """
     hurst_values = np.asarray(hurst_values, dtype="float64")
     if hurst_values.ndim != 1 or not len(hurst_values):
@@ -26,9 +26,9 @@ def matched_fractional_noise(hurst_values, num_observations=model.WINDOW, seed=2
         raise ValueError("Every Hurst coefficient must lie strictly between zero and one.")
 
     embedding_size = 2 * num_observations
-    white = np.random.default_rng(seed).normal(size=embedding_size)
-    frequencies = np.fft.rfft(white)
-    paths = np.empty((len(hurst_values), num_observations))
+    gaussian_seed = np.random.default_rng(seed).normal(size=embedding_size)
+    frequencies = np.fft.rfft(gaussian_seed)
+    driver_paths = np.empty((len(hurst_values), num_observations))
 
     for i, hurst in enumerate(hurst_values):
         autocovariance = model.fractional_gaussian_autocovariance(
@@ -38,10 +38,10 @@ def matched_fractional_noise(hurst_values, num_observations=model.WINDOW, seed=2
             (autocovariance, np.zeros(1), autocovariance[1:][::-1])
         )
         eigenvalues = np.maximum(np.fft.rfft(circulant_row).real, 0.0)
-        paths[i] = np.fft.irfft(
+        driver_paths[i] = np.fft.irfft(
             frequencies * np.sqrt(eigenvalues), n=embedding_size
         )[:num_observations]
-    return paths
+    return driver_paths
 
 
 def save_hurst_gif(
@@ -52,12 +52,14 @@ def save_hurst_gif(
     seed=20260907,
     fps=10,
 ):
-    """Animate reversal, white-noise, and persistence regimes as H changes."""
+    """Animate the diagnostic driver path and its partial sum as H changes."""
     if hurst_values is None:
         hurst_values = np.linspace(0.35, 0.75, 41)
     hurst_values = np.asarray(hurst_values, dtype="float64")
-    paths = matched_fractional_noise(hurst_values, num_observations, seed)
-    cumulative = np.column_stack((np.zeros(len(paths)), np.cumsum(paths, axis=1)))
+    driver_paths = matched_fractional_noise(hurst_values, num_observations, seed)
+    partial_sums = np.column_stack(
+        (np.zeros(len(driver_paths)), np.cumsum(driver_paths, axis=1))
+    )
     lags = np.arange(1, max_lag + 1)
     autocorrelations = model.fractional_gaussian_autocovariance(
         hurst_values, max_lag + 1
@@ -80,17 +82,17 @@ def save_hurst_gif(
     )
     norm = Normalize(hurst_values.min(), hurst_values.max())
     day = np.arange(1, num_observations + 1)
-    cumulative_day = np.arange(num_observations + 1)
-    innovation_limit = 1.08 * np.max(np.abs(paths))
-    cumulative_limit = 1.08 * np.max(np.abs(cumulative))
+    partial_sum_day = np.arange(num_observations + 1)
+    driver_limit = 1.08 * np.max(np.abs(driver_paths))
+    partial_sum_limit = 1.08 * np.max(np.abs(partial_sums))
     correlation_limit = 1.15 * np.max(np.abs(autocorrelations))
 
     fig = plt.figure(figsize=(11.0, 6.5), facecolor="white")
     grid = fig.add_gridspec(
         2, 2, width_ratios=(2.15, 1), height_ratios=(1, 1), hspace=0.35, wspace=0.28
     )
-    innovations_axis = fig.add_subplot(grid[0, 0])
-    cumulative_axis = fig.add_subplot(grid[1, 0])
+    driver_axis = fig.add_subplot(grid[0, 0])
+    partial_sum_axis = fig.add_subplot(grid[1, 0])
     correlation_axis = fig.add_subplot(grid[:, 1])
     fig.subplots_adjust(left=0.08, right=0.97, top=0.82, bottom=0.14)
     fig.suptitle("How the Hurst coefficient changes signed memory", fontsize=20, y=0.97)
@@ -98,7 +100,7 @@ def save_hurst_gif(
     fig.text(
         0.5,
         0.04,
-        "Matched Gaussian phases in every frame  ·  q, scale, and heavy tails held out",
+        "Same Gaussian seed in every frame  ·  cascade and Student-t radial scale omitted",
         ha="center",
         fontsize=11,
         color=OBSERVED_COLOR,
@@ -106,7 +108,7 @@ def save_hurst_gif(
 
     def draw(frame):
         hurst = hurst_values[frame]
-        innovations = paths[frame]
+        driver = driver_paths[frame]
         path_color = cmap(norm(hurst))
         if np.isclose(hurst, 0.5):
             regime = "no linear memory — successive signs are unrelated"
@@ -117,25 +119,27 @@ def save_hurst_gif(
         regime_label.set_text(rf"$H={hurst:.2f}$  ·  {regime}")
         regime_label.set_color(path_color)
 
-        innovations_axis.clear()
-        innovations_axis.plot(day, innovations, color=path_color, linewidth=1.0)
-        innovations_axis.axhline(0, color=OBSERVED_COLOR, linewidth=0.9, alpha=0.65)
-        innovations_axis.set(
+        driver_axis.clear()
+        driver_axis.plot(day, driver, color=path_color, linewidth=1.0)
+        driver_axis.axhline(0, color=OBSERVED_COLOR, linewidth=0.9, alpha=0.65)
+        driver_axis.set(
             xlim=(1, num_observations),
-            ylim=(-innovation_limit, innovation_limit),
-            title="Latent signed innovations",
-            ylabel=r"$x_t$",
+            ylim=(-driver_limit, driver_limit),
+            title="Fractional-Gaussian driver",
+            ylabel=r"$z_t^{(H)}$",
         )
 
-        cumulative_axis.clear()
-        cumulative_axis.plot(cumulative_day, cumulative[frame], color=path_color, linewidth=2.0)
-        cumulative_axis.axhline(0, color=OBSERVED_COLOR, linewidth=0.9, alpha=0.65)
-        cumulative_axis.set(
+        partial_sum_axis.clear()
+        partial_sum_axis.plot(
+            partial_sum_day, partial_sums[frame], color=path_color, linewidth=2.0
+        )
+        partial_sum_axis.axhline(0, color=OBSERVED_COLOR, linewidth=0.9, alpha=0.65)
+        partial_sum_axis.set(
             xlim=(0, num_observations),
-            ylim=(-cumulative_limit, cumulative_limit),
-            title=r"Accumulated effect  $\sum_{s\leq t}x_s$",
+            ylim=(-partial_sum_limit, partial_sum_limit),
+            title=r"Diagnostic partial sum of $z_t^{(H)}$",
             xlabel="Trading day",
-            ylabel="Cumulative innovation",
+            ylabel="Partial sum",
         )
 
         correlation_axis.clear()
@@ -150,14 +154,14 @@ def save_hurst_gif(
         correlation_axis.set(
             xlim=(0.25, max_lag + 0.75),
             ylim=(-correlation_limit, correlation_limit),
-            title="Theoretical increment autocorrelation",
+            title="Theoretical driver autocorrelation",
             xlabel="Lag (days)",
-            ylabel=r"$\rho_H(k)$",
+            ylabel=r"$\gamma_H(k)$",
         )
         correlation_axis.text(
             0.96,
             0.95,
-            rf"$\rho_H(1)={autocorrelations[frame, 0]:+.2f}$",
+            rf"$\gamma_H(1)={autocorrelations[frame, 0]:+.2f}$",
             transform=correlation_axis.transAxes,
             ha="right",
             va="top",
@@ -166,11 +170,11 @@ def save_hurst_gif(
             weight="bold",
         )
 
-        for axis in (innovations_axis, cumulative_axis, correlation_axis):
+        for axis in (driver_axis, partial_sum_axis, correlation_axis):
             axis.grid(alpha=0.18)
             axis.spines[["top", "right"]].set_visible(False)
             axis.tick_params(labelsize=10)
-        return innovations_axis, cumulative_axis, correlation_axis, regime_label
+        return driver_axis, partial_sum_axis, correlation_axis, regime_label
 
     animation = FuncAnimation(fig, draw, frames=frames, interval=1000 / fps, repeat=True)
     path = Path(path)

@@ -236,9 +236,12 @@ def simulate_from_parameters(parameters, rng):
     pending = np.arange(len(parameters))
     for _ in range(100):
         weights[pending] = shared_orientation_cascade_weights(q[pending], WINDOW, rng)
-        shocks = standardized_multivariate_t(nu[pending], correlation[pending], WINDOW, rng)
+        innovations = standardized_multivariate_t(
+            nu[pending], correlation[pending], WINDOW, rng
+        )
         returns[pending] = (
-            mu[pending, None] + sigma[pending, None] * np.sqrt(weights[pending]) * shocks
+            mu[pending, None]
+            + sigma[pending, None] * np.sqrt(weights[pending]) * innovations
         )
         invalid = (~np.isfinite(returns[pending]).all(axis=(1, 2))) | (returns[pending] <= -1).any(
             axis=(1, 2)
@@ -283,12 +286,21 @@ def prior_table(prior=PRIOR):
     for i, asset in enumerate(prior.assets):
         rows.extend(
             [
-                (f"mu[{asset}]", f"Normal({prior.mu_loc[i]:g}, {prior.mu_scale[i]:g}²)"),
+                (
+                    f"mu[{asset}]",
+                    f"Normal({prior.mu_loc[i]:g}, {prior.mu_scale[i]:g}²)",
+                    f"{asset} daily drift",
+                ),
                 (
                     f"sigma_bar[{asset}]",
                     f"Uniform({prior.sigma_bar_low[i]:g}, {prior.sigma_bar_high[i]:g})",
+                    f"{asset} baseline RMS return scale",
                 ),
-                (f"q[{asset}]", f"Uniform({prior.q_low[i]:g}, {prior.q_high[i]:g})"),
+                (
+                    f"q[{asset}]",
+                    f"Uniform({prior.q_low[i]:g}, {prior.q_high[i]:g})",
+                    f"{asset} cascade contrast and volatility intermittency",
+                ),
             ]
         )
     rows.extend(
@@ -296,14 +308,16 @@ def prior_table(prior=PRIOR):
             (
                 "nu (shared)",
                 f"2 + exp(Uniform(log({prior.nu_low - 2:.4g}), log({prior.nu_high - 2:g})))",
+                "Shared Student-t degrees of freedom and tail thickness",
             ),
             (
                 "correlation",
                 f"Normalized Wishart(df={prior.correlation_df}, scale=I); 3 partial coordinates",
+                "Innovation correlation R; inferred through 3 vine coordinates",
             ),
         ]
     )
-    return pd.DataFrame(rows, columns=["parameter", "prior"]).set_index("parameter")
+    return pd.DataFrame(rows, columns=["parameter", "prior", "meaning"]).set_index("parameter")
 
 
 PARAMETER_LABELS = (
