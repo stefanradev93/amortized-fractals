@@ -75,6 +75,7 @@ def plot_wealth_grid(
     observed_returns,
     tickers,
     d_values,
+    figure_title="Posterior-predictive wealth sensitivity: VOO versus SPMO",
 ):
     """Plot posterior-predictive wealth under every fixed d for each asset."""
     wealth = np.asarray(predictive_wealth)
@@ -121,6 +122,6 @@ def plot_wealth_grid(
             ax.set_xlim(0, 256)
             ax.set_xticks((0, 128, 256))
     axes[0, 0].legend(loc="upper left", frameon=False, fontsize=10)
-    fig.suptitle("Posterior-predictive wealth sensitivity: VOO versus SPMO", fontsize=20)
+    fig.suptitle(figure_title, fontsize=20)
     fig.tight_layout(rect=(0, 0, 1, 0.96))
     return fig
